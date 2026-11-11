@@ -8,7 +8,7 @@ It compares three ways of running the model (a per-token API, a rented GPU, and 
 
 ## Use it
 
-Open the published page (GitHub Pages, from this repository), or download `dist/vyaya-standalone.html` and open it in any browser; it works offline. Nothing you type leaves your device. The front screen gives one headline answer in plain words, with four charts. "Show the working" opens every input, formula, source and open item.
+Open the published page at **https://agravaaniresearch.github.io/vyaya/**, or download `dist/vyaya-standalone.html` and open it in any browser; it works offline. Nothing you type leaves your device. The front screen gives one headline answer in plain words, with four charts. "Show the working" opens every input, formula, source and open item.
 
 Each chart exports as PNG, JPEG or a PowerPoint slide. The export carries the key assumptions, every "not included" item and the list of placeholder values still in use, so a figure never travels without its caveats. "Copy a link to this scenario" puts your changed inputs in the URL.
 
@@ -56,7 +56,7 @@ npm run serve     # http://localhost:8080
 npm run build     # rebuild dist/vyaya-standalone.html after changing anything
 ```
 
-To host on GitHub Pages, enable Pages for the `main` branch, root folder. No build step is needed for the hosted page.
+The page is hosted on GitHub Pages from the `main` branch, root folder (Settings, Pages, Deploy from a branch). No build step is needed for the hosted page; it reads the data files directly, so a merged data correction goes live on the next Pages deploy.
 
 ## Contributing data
 
