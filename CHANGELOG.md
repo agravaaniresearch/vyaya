@@ -2,6 +2,15 @@
 
 All changes to formulas, defaults and assumptions are recorded here with the reason, so any past estimate can be reproduced. Each data file also carries a dataVersion, and each default carries its own change history in `data/assumptions.json`.
 
+## 0.2.1 — 12 November 2026
+
+Connection to Nikasha, the readiness framework for clinical AI tools (https://github.com/agravaaniresearch/nikasha).
+
+- Engine: new `toCostProfile(result, inputs)` maps a calculation onto the shared deployment cost profile (`schema/cost-profile.schema.json`). It is a pure mapping and adds no formula; worst and best are the repriced and quoted cloud prices; the unit is per patient. No existing output changes.
+- Schema: `schema/cost-profile.schema.json` added, a copy of the canonical contract kept in the Nikasha repository. The two copies must stay identical.
+- Tests: `tests/profile.test.js` checks the profile against the schema, that its layers add up to the chosen route, and that it introduces no arithmetic of its own.
+- Nikasha vendors this engine and the tariff and assumption files at a pinned commit and reads six shared inputs from them (hardware life, residual value, cost of capital, GPU failure rate, uncovered share of a failure, PUE), so the two projects hold one copy of each figure.
+
 ## 0.2.0 — 11 November 2026 (data 2026-11-11b)
 
 Changes after the review council (see `docs/REVIEW-FINDINGS.md`).

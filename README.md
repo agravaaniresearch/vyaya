@@ -39,7 +39,7 @@ data/compute_prices.json   rented GPU tiers: subsidised government, Indian comme
 data/sources.json          every source, with how it was actually read
 data/formulas.json         derivation record for each formula, including changes from the brief
 data/open_items.json       open items and unresolved review findings
-schema/                    JSON Schemas for every data file (enforced by the tests)
+schema/                    JSON Schemas for every data file (enforced by the tests), plus the cost-profile contract shared with Nikasha
 tests/                     engine tests (hand-checked values and edge cases) and data integrity tests
 docs/FORMULA-CROSSCHECK.md where and why the engine departs from the handover brief
 docs/REVIEW-FINDINGS.md    the review council's findings and what was done about them
@@ -57,6 +57,10 @@ npm run build     # rebuild dist/vyaya-standalone.html after changing anything
 ```
 
 The page is hosted on GitHub Pages from the `main` branch, root folder (Settings, Pages, Deploy from a branch). No build step is needed for the hosted page; it reads the data files directly, so a merged data correction goes live on the next Pages deploy.
+
+## Used by Nikasha
+
+[Nikasha](https://github.com/agravaaniresearch/nikasha) scores CT and MRI AI tools for readiness to enter clinical practice. It vendors this engine and its tariff and assumption files at a pinned commit, so a state tariff or hardware-life correction made here reaches Nikasha's affordability axis when Nikasha re-vendors. `toCostProfile()` exports a Vyaya result in the shared contract, `schema/cost-profile.schema.json`.
 
 ## Contributing data
 

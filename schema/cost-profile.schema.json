@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/agravaaniresearch/nikasha/schema/cost-profile.schema.json",
+  "title": "Deployment cost profile (Vyaya and Nikasha contract)",
+  "description": "The one document that passes between a cost calculator and a readiness framework. Nikasha's cost bridge produces it per study for imaging tools; Vyaya can produce it per patient for document extraction. A consumer must check contractVersion (major version must match) and unit before using figures. Every money figure is in the stated currency; worst and best follow the producer's stated rule.",
+  "type": "object",
+  "required": ["contractVersion", "producer", "unit", "currency", "figures", "notIncluded", "flags", "synthetic"],
+  "properties": {
+    "contractVersion": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "producer": {
+      "type": "object", "required": ["name", "version"],
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" }, "vyayaEngine": { "type": "string" } }
+    },
+    "unit": { "enum": ["per_study", "per_patient"] },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "mode": { "enum": ["administrative", "advisory", "triage", "autonomous"] },
+    "synthetic": { "type": "boolean", "description": "True whenever any figure rests on synthetic, placeholder or illustrative inputs." },
+    "volume": {
+      "type": "object",
+      "properties": { "studiesPerDay": { "type": ["number", "null"] }, "studiesPerMonth": { "type": ["number", "null"] }, "patientsPerMonth": { "type": ["number", "null"] } }
+    },
+    "tariff": {
+      "type": "object",
+      "properties": { "value": { "type": ["number", "null"] }, "source": { "type": "string" }, "status": { "type": "string" }, "state": { "type": ["string", "null"] } }
+    },
+    "figures": {
+      "description": "Inputs to Nikasha's derived infrastructure parameters. valid false means they could not be computed and those parameters score 0.",
+      "oneOf": [
+        { "type": "object", "required": ["valid", "missing"], "properties": { "valid": { "const": false }, "missing": { "type": "array", "items": { "type": "string" } } } },
+        {
+          "type": "object",
+          "required": ["valid", "whPerStudy", "gco2PerStudy", "dailyCostPerStudy", "storageCostPerStudy", "tcoPerStudy"],
+          "properties": {
+            "valid": { "const": true },
+            "whPerStudy": { "$ref": "#/definitions/nonneg" }, "gco2PerStudy": { "$ref": "#/definitions/nonneg" },
+            "dailyCostPerStudy": { "$ref": "#/definitions/nonneg" }, "storageCostPerStudy": { "$ref": "#/definitions/nonneg" },
+            "tcoPerStudy": { "$ref": "#/definitions/nonneg" }, "kwhPerDay": { "$ref": "#/definitions/nonneg" },
+            "co2KgPerYear": { "$ref": "#/definitions/nonneg" }, "dailyCost": { "$ref": "#/definitions/nonneg" },
+            "storageMonthly": { "$ref": "#/definitions/nonneg" }, "tco5y": { "$ref": "#/definitions/nonneg" }
+          }
+        }
+      ]
+    },
+    "layers": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "label", "perStudy"],
+        "properties": {
+          "id": { "enum": ["licence_compute", "power", "storage", "integration", "validation", "governance", "reading", "errors", "compute", "people"] },
+          "label": { "type": "string" },
+          "perStudy": { "$ref": "#/definitions/band" },
+          "fixedMonthly": { "$ref": "#/definitions/nonneg" },
+          "variablePerStudy": { "$ref": "#/definitions/band" }
+        }
+      }
+    },
+    "total": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/band" }] },
+    "manual": { "oneOf": [{ "type": "null" }, { "type": "object" }] },
+    "net": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/signedBand" }] },
+    "breakEvenStudiesPerMonth": { "oneOf": [{ "type": "null" }, { "type": "object", "properties": { "worst": { "type": ["number", "null"] }, "best": { "type": ["number", "null"] }, "reason": { "type": ["string", "null"] } } }] },
+    "computeShare": { "oneOf": [{ "type": "null" }, { "type": "object", "properties": { "worst": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }, "best": { "type": ["number", "null"], "minimum": 0, "maximum": 1 } } }] },
+    "affordability": {
+      "type": "object", "required": ["verdict", "label", "reason"],
+      "properties": { "verdict": { "enum": ["SAVES", "EVIDENCE_DEPENDENT", "COSTS_MORE", "INDETERMINATE"] }, "label": { "type": "string" }, "reason": { "type": "string" } }
+    },
+    "whoPays": { "type": ["object", "null"] },
+    "drivers": { "type": "array", "items": { "type": "object", "required": ["id", "decidesVerdict"] } },
+    "inputsUsed": {
+      "type": "array",
+      "items": {
+        "type": "object", "required": ["id", "status"],
+        "properties": { "id": { "type": "string" }, "status": { "enum": ["statutory", "secondary", "placeholder", "illustrative", "user", "constant", "missing"] }, "origin": { "enum": ["nikasha", "vyaya", "tool", "none"] } }
+      }
+    },
+    "placeholdersInUse": { "type": "array", "items": { "type": "string" } },
+    "notIncluded": { "type": "array", "items": { "type": "string" } },
+    "flags": { "type": "array", "items": { "type": "object", "required": ["level", "text"], "properties": { "level": { "enum": ["info", "warn"] }, "text": { "type": "string" } } } }
+  },
+  "definitions": {
+    "nonneg": { "type": "number", "minimum": 0 },
+    "band": { "type": "object", "required": ["worst", "best"], "properties": { "worst": { "type": "number", "minimum": 0 }, "best": { "type": "number", "minimum": 0 } } },
+    "signedBand": { "type": "object", "required": ["worst", "best"], "properties": { "worst": { "type": "number" }, "best": { "type": "number" } } }
+  }
+}

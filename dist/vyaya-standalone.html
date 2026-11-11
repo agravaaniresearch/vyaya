@@ -270,7 +270,7 @@ footer { color: var(--ink-3); font-size: 0.82rem; padding: 10px 0 40px; }
 (function (root) {
   'use strict';
 
-  var ENGINE_VERSION = '0.2.0';
+  var ENGINE_VERSION = '0.2.1';
   var HOURS_PER_MONTH_DEFAULT = 8760 / 12; // 730
 
   function num(x) { return typeof x === 'number' && isFinite(x); }
@@ -704,8 +704,59 @@ footer { color: var(--ink-3); font-size: 0.82rem; padding: 10px 0 40px; }
     return out;
   }
 
+  /* ---------- Deployment cost profile (shared contract with Nikasha) ----------
+     Maps a calculate() result onto schema/cost-profile.schema.json, the
+     document Nikasha reads. Pure mapping: it adds no formula of its own.
+     Vyaya works per patient and has no performance band, so its worst and
+     best are the repriced and the quoted cloud prices. Vyaya does not compute
+     energy or carbon per imaging study, so figures are marked not valid and
+     Nikasha's derived infrastructure parameters will not use them. */
+  var PROFILE_CONTRACT_VERSION = '1.0.0';
+  function toCostProfile(result, inputs) {
+    var r = result || {};
+    var q = r.chosen, s = r.chosenStressed;
+    var flags = (r.flags || []).map(function (f) { return { level: f.level === 'warn' ? 'warn' : 'info', text: f.text }; });
+    flags.push({ level: 'info', text: 'Produced by Vyaya: per patient, worst = repriced cloud prices, best = quoted prices. Energy and carbon per study are not computed here.' });
+    var N = r.patientsPerMonth || 0;
+    var p = {
+      contractVersion: PROFILE_CONTRACT_VERSION,
+      producer: { name: 'vyaya', version: ENGINE_VERSION, vyayaEngine: ENGINE_VERSION },
+      unit: 'per_patient', currency: 'INR', synthetic: true,
+      volume: { patientsPerMonth: N, studiesPerDay: null, studiesPerMonth: null },
+      figures: { valid: false, missing: ['whPerStudy', 'gco2PerStudy', 'dailyCostPerStudy', 'storageCostPerStudy', 'tcoPerStudy'] },
+      layers: [], total: null, manual: null, net: null, breakEvenStudiesPerMonth: null, computeShare: null,
+      affordability: { verdict: 'INDETERMINATE', label: 'Not computed', reason: 'No available route, or zero patients.' },
+      whoPays: null, drivers: [], inputsUsed: [], placeholdersInUse: [], notIncluded: (r.notIncluded || []).slice(), flags: flags
+    };
+    if (inputs && inputs.payerShares) p.whoPays = { sharesPct: inputs.payerShares, monthlyWorst: {}, monthlyBest: r.whoPays || {} };
+    if (!q || !q.available || !(N > 0)) return p;
+    var w = s && s.available ? s : q;
+    function per(x, k) { return Math.max(0, x.monthly[k] / N); }
+    p.layers = [
+      { id: 'compute', label: 'Compute (' + q.label + ')', perStudy: { worst: per(w, 'compute'), best: per(q, 'compute') } },
+      { id: 'people', label: 'Engineering, support and review', perStudy: { worst: per(w, 'people'), best: per(q, 'people') } },
+      { id: 'validation', label: 'Validation, re-validation and monitoring', perStudy: { worst: (w.monthly.validationOneTime + w.monthly.revalidation + w.monthly.monitoring) / N, best: (q.monthly.validationOneTime + q.monthly.revalidation + q.monthly.monitoring) / N } },
+      { id: 'errors', label: 'Cost of uncaught errors', perStudy: { worst: per(w, 'errors'), best: per(q, 'errors') } }
+    ];
+    p.total = { worst: w.perPatient, best: q.perPatient };
+    var m = r.manualPerPatient;
+    p.manual = { worst: m, best: m };
+    p.net = { worst: w.perPatient - m, best: q.perPatient - m };
+    p.breakEvenStudiesPerMonth = { worst: w.manualBreakEven.value, best: q.manualBreakEven.value, reason: w.manualBreakEven.reason || q.manualBreakEven.reason || null };
+    p.computeShare = { worst: w.computeShare, best: q.computeShare };
+    var hi = Math.max(p.net.worst, p.net.best), lo = Math.min(p.net.worst, p.net.best);
+    p.affordability = hi <= 0 ? { verdict: 'SAVES', label: 'Costs less than manual entry at both quoted and repriced cloud prices' }
+      : lo <= 0 ? { verdict: 'EVIDENCE_DEPENDENT', label: 'Costs less than manual entry only if cloud prices hold' }
+      : { verdict: 'COSTS_MORE', label: 'Costs more per patient than manual entry' };
+    p.affordability.reason = 'Net cost per patient against manual entry: INR ' + (Math.round(p.net.worst * 100) / 100) + ' (repriced) to INR ' + (Math.round(p.net.best * 100) / 100) + ' (quoted). Negative means AI saves money.';
+    if (p.whoPays) Object.keys(p.whoPays.sharesPct).forEach(function (k) { p.whoPays.monthlyWorst[k] = w.monthly.total * (p.whoPays.sharesPct[k] || 0) / 100; });
+    return p;
+  }
+
   var api = {
     ENGINE_VERSION: ENGINE_VERSION,
+    PROFILE_CONTRACT_VERSION: PROFILE_CONTRACT_VERSION,
+    toCostProfile: toCostProfile,
     buildInputs: buildInputs,
     defaultValues: defaultValues,
     placeholdersInUse: placeholdersInUse,
