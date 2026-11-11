@@ -1,14 +1,14 @@
 {
   "meta": {
-    "description": "Rented GPU price tiers for normalisation. Prices are per GPU-hour on demand, excluding GST. Each row says where it is hosted, for the data-residency rule. Older or smaller GPUs can be added as rows; the calculator does not assume top-end hardware.",
-    "dataVersion": "2026-11-11"
+    "description": "Rented GPU price tiers for normalisation. Prices are per GPU-hour excluding GST, on demand unless the row says otherwise. Each row says where it is hosted, for the data-residency rule. All priced rows are currently H100-class; previous-generation GPUs (L4, L40S, A100, T4) are welcome as sourced rows, since the calculator does not assume top-end hardware.",
+    "dataVersion": "2026-11-11b"
   },
   "rows": [
     {
       "id": "indiaai-average",
       "tier": "Government subsidised",
-      "label": "IndiaAI portal, average subsidised rate",
-      "gpu": "Mixed (average, excludes select high-end GPUs)",
+      "label": "IndiaAI portal, headline subsidised rate (eligibility required)",
+      "gpu": "Mixed (not stated)",
       "pricePerGpuHour": 65,
       "currency": "INR",
       "hostedInIndia": true,
@@ -17,13 +17,14 @@
         "pib-feb-2026-backgrounder",
         "productgrowth-gpu-price-india"
       ],
-      "lastVerified": "2026-11-11",
-      "note": "PIB headline average for eligible users. Eligibility applies; sources disagree (about 65 to 100 rupees). Verify on the portal."
+      "lastVerified": null,
+      "note": "PIB's February 2026 backgrounder (opened by the review council) says 38,000+ high-end GPUs are available at Rs 65 per hour; it does not call this an average. It cannot be an H100 rate: the L1 bid of Rs 153 less the 40% subsidy cap is at least Rs 91.8. Sources give about Rs 65 to 100 (the brief: 67 to 92). Eligibility: researchers, startups and MSMEs, students, government entities.",
+      "verification": "PIB PDF opened by the review council; portal not opened"
     },
     {
       "id": "indiaai-h100-l1",
       "tier": "Government empanelled (before subsidy)",
-      "label": "IndiaAI portal, H100 SXM on demand, L1 bid",
+      "label": "IndiaAI portal, H100 SXM on demand, L1 bid before subsidy (eligibility required)",
       "gpu": "H100 SXM",
       "pricePerGpuHour": 153,
       "currency": "INR",
@@ -32,8 +33,9 @@
       "sources": [
         "ecorpit-indiaai-rates-nov-2026"
       ],
-      "lastVerified": "2026-11-11",
-      "note": "Read from the portal calculator by a secondary source on 1 Nov 2026; excludes GST and the subsidy (capped at 40%)."
+      "lastVerified": null,
+      "note": "Read from the portal calculator by a secondary source on 1 Nov 2026; excludes GST and the subsidy (capped at 40%).",
+      "verification": "search snippet only"
     },
     {
       "id": "in-commercial-h100",
@@ -48,13 +50,14 @@
         "productgrowth-gpu-price-india",
         "ecorpit-indiaai-rates-nov-2026"
       ],
-      "lastVerified": "2026-11-11",
-      "note": "Shakti Cloud and Yotta list Rs 356; E2E Rs 379.05 (secondary reading, Oct to Nov 2026). The brief's older figure was about Rs 217."
+      "lastVerified": null,
+      "note": "Shakti Cloud and Yotta list Rs 356; E2E Rs 379.05 (secondary reading, Oct to Nov 2026). The brief's older figure was about Rs 217.",
+      "verification": "search snippet only"
     },
     {
       "id": "hyperscaler-h100-mumbai",
       "tier": "Hyperscaler",
-      "label": "Hyperscaler, H100 capacity block, Mumbai region",
+      "label": "Hyperscaler, H100 reserved capacity block, Mumbai region",
       "gpu": "H100",
       "pricePerGpuHour": 5.97,
       "currency": "USD",
@@ -63,8 +66,9 @@
       "sources": [
         "ecorpit-indiaai-rates-nov-2026"
       ],
-      "lastVerified": "2026-11-11",
-      "note": "AWS Capacity Block Mumbai per H100-hour as reported by a secondary source. The brief cited 2.50 to 4.00 USD for hyperscalers generally."
+      "lastVerified": null,
+      "note": "AWS Capacity Block (reserved, not on-demand) price per H100-hour as reported by a secondary source; GST treatment not confirmed. The brief cited 2.50 to 4.00 USD for hyperscalers generally. Replace with an on-demand price page.",
+      "verification": "search snippet only"
     },
     {
       "id": "custom",

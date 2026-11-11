@@ -1,31 +1,479 @@
 {
   "meta": {
     "description": "Derivation record. Each formula the engine applies, with its inputs, units, how it was derived, the sources behind it, and how it differs from the handover brief. 'trace' lists the keys under which the engine reports the live value.",
-    "engineVersion": "0.1.0",
+    "engineVersion": "0.2.0",
     "dataVersion": "2026-11-11"
   },
   "formulas": [
-    { "id": "W1", "section": "6.1", "name": "Tokens per patient", "expression": "Tin = measured input tokens, else pages x input tokens per page; Tout likewise", "units": "tokens", "inputs": ["pagesPerPatient", "inTokPerPage", "outTokPerPage", "measuredTin", "measuredTout"], "trace": ["W1_tin", "W2_tout"], "derivation": "Direct from the brief. Measured averages override the page estimate, as the brief recommends.", "sources": ["author-brief"], "version": "1", "changeFromBrief": null },
-    { "id": "W3", "section": "6.2", "name": "Throughput from token speeds (optional)", "expression": "patients per GPU-hour = 3600 / (Tin / input tokens per s + Tout / output tokens per s)", "units": "patients/GPU-hour", "inputs": ["rentPrefillTps", "rentDecodeTps", "ownPrefillTps", "ownDecodeTps"], "trace": ["C2_rentPatientsPerGpuHour", "C8_ownPatientsPerGpuHour"], "derivation": "Seconds per patient is the time to read the input plus the time to write the output, at aggregate (batched) speeds per GPU.", "sources": [], "version": "1", "changeFromBrief": "Added. The brief took patients per GPU-hour as given." },
-    { "id": "C1", "section": "6.2A", "name": "Per-token API cost per patient", "expression": "(Tin / 1e6 x input price + Tout / 1e6 x output price) x INR per USD x (1 + GST) x repricing factor", "units": "INR/patient", "inputs": ["apiPriceInPerM", "apiPriceOutPerM", "usdInr", "cloudGstPct", "repricingFactor"], "trace": ["C1_apiPerPatient", "C1_apiPerPatient_stressed"], "derivation": "The brief's formula, with currency conversion and GST added, and the repricing factor applied only in the stress-tested figure.", "sources": ["gst-cloud-18"], "version": "1", "changeFromBrief": "Added exchange rate and non-recoverable GST; the brief's formula had no currency step." },
-    { "id": "C2", "section": "6.2B", "name": "Rented GPU cost per patient", "expression": "GPU-hour rate x (1 + GST) x repricing factor / (patients per GPU-hour x share of billed hours doing useful work)", "units": "INR/patient", "inputs": ["rentTier", "rentCustomRateInr", "rentPatientsPerGpuHour", "rentEfficiency", "cloudGstPct", "usdInr"], "trace": ["C2_rentPerPatient", "C2_rentPerPatient_stressed"], "derivation": "The brief's formula assumes every billed hour is fully used. A billing-efficiency factor makes that assumption visible.", "sources": ["pib-feb-2026-backgrounder", "ecorpit-indiaai-rates-nov-2026", "productgrowth-gpu-price-india"], "version": "1", "changeFromBrief": "Added GST, currency conversion for USD tiers, and billing efficiency (default 1, which matches the brief)." },
-    { "id": "C3", "section": "6.2C", "name": "Capital cost per month", "expression": "If cost of money r = 0: price x (1 - residual) / (life x 12). Otherwise: (price - residual x (1 + i)^-n) x i / (1 - (1 + i)^-n), with i = r/12 and n = life x 12", "units": "INR/month", "inputs": ["rigPriceInr", "lifeYears", "residualPct", "costOfCapitalPct"], "trace": ["C3_capitalPerMonth", "C3_depreciationStraightLine", "C3_taxDepreciationYear1"], "derivation": "Straight-line depreciation over the effective life. The capital-recovery form adds interest, because renting needs no upfront money and buying does. With r = 0 it reduces exactly to the brief's formula. The 40% WDV tax figure is shown for information only.", "sources": ["companies-act-schedule-ii", "epfo-depreciation-circular-2026", "incometax-depreciation-rates", "income-tax-act-2025-depreciation"], "version": "1", "changeFromBrief": "Default life is 6 years (Schedule II, servers and networks), not 3. Residual value and cost of money added, both defaulting to zero." },
-    { "id": "C4", "section": "6.2C", "name": "Failure allowance per month", "expression": "price x annual failure rate x GPU share of price x share not covered by warranty / 12", "units": "INR/month", "inputs": ["rigPriceInr", "annualFailureRate", "gpuShareOfPrice", "failureUncoveredShare"], "trace": ["C4_failurePerMonth"], "derivation": "Expected annual replacement cost for N GPUs is N x rate x unit price, which equals rate x (GPU share of rig price) x rig price. The brief's 'replacement share' is split into its two parts so each can be checked. Placeholder rate: (148 + 72) / 16,384 x 365 / 54 = 0.091 a year from the Llama 3 report.", "sources": ["llama3-paper"], "version": "1", "changeFromBrief": "Replacement share made explicit as GPU share times uncovered share. The brief's 27% over three years is 3 x 9%; compounding gives 1 - (1 - 0.091)^3 = 24.9%." },
-    { "id": "C5", "section": "6.2C", "name": "Power", "expression": "Idle (fixed) = kW x idle share x hours x PUE x landed tariff. Active (per patient) = kW x (1 - idle share) x PUE x landed tariff / (patients per GPU-hour x GPUs)", "units": "INR/month and INR/patient", "inputs": ["rigPowerKw", "idlePowerFrac", "pue", "hoursPerMonth", "state", "gridTariffOverride", "captiveOverride"], "trace": ["C5_idleEnergyPerMonth", "C5_activeEnergyPerPatient", "C5_powerPerMonthAtVolume", "E1_landedTariff"], "derivation": "The brief multiplied by a separate utilisation input while volume was also a slider, so the two could contradict each other. Here utilisation follows from volume, which also gives the rig its variable cost per patient used in the break-even. Idle draw and cooling overhead are added because a switched-on rig in a hospital server room draws both.", "sources": ["bharatdcim-state-tariffs"], "version": "1", "changeFromBrief": "Utilisation derived from volume; idle draw and PUE added; power split into fixed and variable parts." },
-    { "id": "E1", "section": "6.2C", "name": "Landed tariff", "expression": "Grid: state table value, or your own figure. Captive: (PPA + wheeling + cross-subsidy surcharge + other) / (1 - losses)", "units": "INR/kWh", "inputs": ["state", "gridTariffOverride", "captivePpa", "captiveWheeling", "captiveCss", "captiveOther", "captiveLossPct"], "trace": ["E1_landedTariff", "E1_source"], "derivation": "Losses are applied as a gross-up of every per-unit charge, which is a simplification: some orders levy wheeling on injected rather than delivered units.", "sources": ["ogd-state-electricity", "niti-iced", "bharatdcim-state-tariffs"], "version": "1", "changeFromBrief": null },
-    { "id": "C8", "section": "6.2C", "name": "Owned rig fixed cost, capacity and rigs needed", "expression": "Fixed per rig = capital + failure + idle power + maintenance. Capacity = patients per GPU-hour x GPUs x hours x duty cycle. Rigs = max(1, ceil(patients / capacity)). Owned monthly = rigs x fixed per rig + land + active power x patients", "units": "INR/month", "inputs": ["rigGpuCount", "dutyCycle", "maintenanceInrPerMonth", "landInrPerMonth"], "trace": ["C8_perRigFixed", "C8_capacityPerRig", "C8_rigsNeeded", "C8_utilisation", "C7_landPerMonth"], "derivation": "The brief's capacity formula omitted the number of GPUs. Above one rig's capacity the brief called the result invalid; here whole extra rigs are bought and the output is flagged. Land is counted once per site.", "sources": [], "version": "1", "changeFromBrief": "GPU count added to capacity; volumes above capacity priced as extra rigs and flagged." },
-    { "id": "B1", "section": "6.2", "name": "Buy-versus-rent break-even", "expression": "N* = (fixed per rig + land) / (cloud cost per patient - rig active cost per patient), valid only if the denominator is positive; reported beyond capacity if N* exceeds one rig", "units": "patients/month", "inputs": [], "trace": [], "derivation": "Owned cost F + vN equals cloud cost cN at N = F / (c - v). Computed for both cloud routes, quoted and stress-tested.", "sources": [], "version": "1", "changeFromBrief": "Computed against each cloud route separately and for the stress-tested prices." },
-    { "id": "P3", "section": "6.3", "name": "Review fraction and residual error", "expression": "Residual error = e x (1 - min(1, k x f) x s). In accuracy mode, f = (1 - (1 - A) / e) / (s x k), clamped to 0..1 and flagged if unreachable", "units": "fraction", "inputs": ["reviewMode", "reviewFraction", "requiredAccuracy", "modelErrorRate", "reviewSensitivity", "reviewTargeting"], "trace": ["P3_reviewFraction", "P3_residualErrorRate", "P3_accuracyAchieved", "P3_reviewPerPatient"], "derivation": "Implements the brief's requirement that required accuracy and review fraction be linked. Random review (k = 1) catches f x s of errors; targeted review concentrates errors in the reviewed set.", "sources": [], "version": "1", "changeFromBrief": "The brief stated the link but gave no formula." },
-    { "id": "P4", "section": "6.3", "name": "Fixed people cost", "expression": "build cost / amortisation months + recurring support", "units": "INR/month", "inputs": ["buildCostInr", "buildAmortMonths", "supportInrPerMonth"], "trace": ["P1_buildAmortised", "P2_support", "P4_peopleFixed"], "derivation": "Direct from the brief.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "V1", "section": "6.4", "name": "Initial validation and governance", "expression": "Study = sample x (clinician min x rate + annotator min x rate) + analysis. Monthly = (study + governance) / amortisation months", "units": "INR/month", "inputs": ["valSampleSize", "clinMinPerCase", "clinInrPerMin", "annoMinPerCase", "annoInrPerMin", "valAnalysisInr", "governanceInr", "valAmortMonths"], "trace": ["V1_initialStudy", "V1_perCase", "V5_governance", "V1_oneTimeAmortised"], "derivation": "Direct from the brief, with governance added to the total.", "sources": [], "version": "1", "changeFromBrief": "The brief listed governance costs but left them out of the total in 6.5." },
-    { "id": "V2", "section": "6.4", "name": "Re-validation", "expression": "changes a year x re-validation sample x cost per reference answer / 12", "units": "INR/month", "inputs": ["changesPerYear", "revalSampleSize", "costPerRefAnswerInr"], "trace": ["V2_costPerRefAnswer", "V2_revalidationPerMonth"], "derivation": "Direct from the brief. Cost per reference answer defaults to the initial study's per-record cost.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "V3", "section": "6.4", "name": "Ongoing monitoring", "expression": "patients x audit fraction x audit minutes x cost per minute", "units": "INR/month", "inputs": ["auditFraction", "auditMinutes", "auditInrPerMin"], "trace": ["V3_auditPerPatient", "V3_monitoringPerMonth"], "derivation": "Direct from the brief.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "V4", "section": "6.4", "name": "Error cost", "expression": "patients x residual error rate x cost per uncaught error", "units": "INR/month", "inputs": ["costPerUncaughtErrorInr"], "trace": ["V4_errorPerPatient", "V4_errorPerMonth"], "derivation": "Uses the residual error after review from P3, rather than a separate residual input, so review effort and error cost stay consistent.", "sources": [], "version": "1", "changeFromBrief": "Residual error rate is derived, not entered separately." },
-    { "id": "T1", "section": "6.5", "name": "Total monthly AI cost and cost per patient", "expression": "Total = compute + review + fixed people + validation (one-time amortised + re-validation + monitoring + errors). Per patient = total / patients (undefined at zero patients)", "units": "INR/month, INR/patient", "inputs": [], "trace": [], "derivation": "Direct from the brief, with governance included.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "M1", "section": "6.5", "name": "Manual cost per patient", "expression": "manual minutes x cost per minute (or your direct figure) + manual error rate x cost per uncaught error, if both are set", "units": "INR/patient", "inputs": ["manualMinutes", "manualInrPerMin", "manualCostPerPatientInr", "manualErrorRate"], "trace": ["M1_manualPerPatient"], "derivation": "The denominator must be like for like: if AI is charged for its errors, manual entry is charged for its own.", "sources": [], "version": "1", "changeFromBrief": "Manual error cost added as an option." },
-    { "id": "M2", "section": "6.5", "name": "Break-even versus manual", "expression": "N = all AI fixed costs / (manual cost per patient - AI variable cost per patient), valid only if AI variable cost is below manual cost", "units": "patients/month", "inputs": [], "trace": [], "derivation": "The brief's numerator was fixed people cost alone. Validation fixed costs and, on the owned route, the rig's fixed cost are also fixed, so leaving them out understates the break-even volume.", "sources": [], "version": "1", "changeFromBrief": "Numerator widened to all fixed AI costs." },
-    { "id": "S1", "section": "6.6", "name": "Stress-tested cloud cost", "expression": "quoted cloud price x repricing factor, for both the API and the rented GPU", "units": "INR/patient", "inputs": ["repricingFactor"], "trace": ["C1_apiPerPatient_stressed", "C2_rentPerPatient_stressed"], "derivation": "Direct from the brief. For the IndiaAI tier the risk is a policy change in the subsidy rather than investor money, but the same factor is applied; the label says so.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "W6", "section": "6.7", "name": "Who pays", "expression": "payer amount = total monthly cost x payer share; shares should sum to 100%", "units": "INR/month", "inputs": ["payerPatient", "payerHospital", "payerInsurer", "payerConsortium"], "trace": [], "derivation": "Direct from the brief. Shares that do not sum to 100% are flagged, not silently rescaled.", "sources": [], "version": "1", "changeFromBrief": null },
-    { "id": "W7", "section": "6.7", "name": "Pooled scenario", "expression": "Per centre = (fixed people + (1 - local share) x validation fixed) / centres + local share x validation fixed + compute at pooled volume / centres + variable review, audit and error cost for the centre", "units": "INR/month per centre", "inputs": ["pooledCentres", "perCentreVolume", "localValidationShare"], "trace": ["W7_pooledPerPatient"], "derivation": "The brief divided all fixed people and validation cost across centres. Validation must still be shown on each hospital's own documents, so a local share stays with each centre.", "sources": [], "version": "1", "changeFromBrief": "Local validation share added." }
+    {
+      "id": "W1",
+      "section": "6.1",
+      "name": "Tokens per patient",
+      "expression": "Tin = measured input tokens, else pages x input tokens per page; Tout likewise",
+      "units": "tokens",
+      "inputs": [
+        "pagesPerPatient",
+        "inTokPerPage",
+        "outTokPerPage",
+        "measuredTin",
+        "measuredTout"
+      ],
+      "trace": [
+        "W1_tin",
+        "W2_tout"
+      ],
+      "derivation": "Direct from the brief. Measured averages override the page estimate, as the brief recommends.",
+      "sources": [
+        "author-brief"
+      ],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "W3",
+      "section": "6.2",
+      "name": "Throughput from token speeds (optional)",
+      "expression": "patients per GPU-hour = 3600 / (Tin / input tokens per s + Tout / output tokens per s)",
+      "units": "patients/GPU-hour",
+      "inputs": [
+        "rentPrefillTps",
+        "rentDecodeTps",
+        "ownPrefillTps",
+        "ownDecodeTps"
+      ],
+      "trace": [
+        "C2_rentPatientsPerGpuHour",
+        "C8_ownPatientsPerGpuHour"
+      ],
+      "derivation": "Seconds per patient is the time to read the input plus the time to write the output, at aggregate (batched) speeds per GPU.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "Added. The brief took patients per GPU-hour as given."
+    },
+    {
+      "id": "C1",
+      "section": "6.2A",
+      "name": "Per-token API cost per patient",
+      "expression": "(Tin / 1e6 x input price + Tout / 1e6 x output price) x INR per USD x (1 + GST) x repricing factor",
+      "units": "INR/patient",
+      "inputs": [
+        "apiPriceInPerM",
+        "apiPriceOutPerM",
+        "usdInr",
+        "cloudGstPct",
+        "repricingFactor"
+      ],
+      "trace": [
+        "C1_apiPerPatient",
+        "C1_apiPerPatient_stressed"
+      ],
+      "derivation": "The brief's formula, with currency conversion and GST added, and the repricing factor applied only in the stress-tested figure.",
+      "sources": [
+        "gst-cloud-18"
+      ],
+      "version": "1",
+      "changeFromBrief": "Added exchange rate and non-recoverable GST; the brief's formula had no currency step."
+    },
+    {
+      "id": "C2",
+      "section": "6.2B",
+      "name": "Rented GPU cost per patient",
+      "expression": "GPU-hour rate x (1 + GST) x repricing factor / (patients per GPU-hour x share of billed hours doing useful work); unavailable if the tier has no price",
+      "units": "INR/patient",
+      "inputs": [
+        "rentTier",
+        "rentCustomRateInr",
+        "rentPatientsPerGpuHour",
+        "rentEfficiency",
+        "cloudGstPct",
+        "usdInr"
+      ],
+      "trace": [
+        "C2_rentPerPatient",
+        "C2_rentPerPatient_stressed"
+      ],
+      "derivation": "The brief's formula assumes every billed hour is fully used. A billing-efficiency factor makes that assumption visible.",
+      "sources": [
+        "pib-feb-2026-backgrounder",
+        "ecorpit-indiaai-rates-nov-2026",
+        "productgrowth-gpu-price-india"
+      ],
+      "version": "2",
+      "changeFromBrief": "Added GST, currency conversion for USD tiers, and billing efficiency (default 1, which matches the brief)."
+    },
+    {
+      "id": "C3",
+      "section": "6.2C",
+      "name": "Capital cost per month",
+      "expression": "If cost of money r = 0: price x (1 - residual) / (life x 12). Otherwise: (price - residual x (1 + i)^-n) x i / (1 - (1 + i)^-n), with i = r/12 and n = life x 12",
+      "units": "INR/month",
+      "inputs": [
+        "rigPriceInr",
+        "lifeYears",
+        "residualPct",
+        "costOfCapitalPct"
+      ],
+      "trace": [
+        "C3_capitalPerMonth",
+        "C3_depreciationStraightLine",
+        "C3_taxDepreciationYear1"
+      ],
+      "derivation": "Straight-line depreciation over the effective life. The capital-recovery form adds interest, because renting needs no upfront money and buying does. With r = 0 it reduces exactly to the brief's formula. The 40% WDV tax figure is shown for information only.",
+      "sources": [
+        "companies-act-schedule-ii",
+        "epfo-depreciation-circular-2026",
+        "incometax-depreciation-rates",
+        "income-tax-act-2025-depreciation"
+      ],
+      "version": "1",
+      "changeFromBrief": "Default life is 6 years (Schedule II, servers and networks), not 3. Residual value and cost of money added, both defaulting to zero."
+    },
+    {
+      "id": "C4",
+      "section": "6.2C",
+      "name": "Failure allowance per month",
+      "expression": "price x annual failure rate x GPU share of price x share not covered by warranty / 12",
+      "units": "INR/month",
+      "inputs": [
+        "rigPriceInr",
+        "annualFailureRate",
+        "gpuShareOfPrice",
+        "failureUncoveredShare"
+      ],
+      "trace": [
+        "C4_failurePerMonth"
+      ],
+      "derivation": "Expected annual replacement cost for N GPUs is N x rate x unit price, which equals rate x (GPU share of rig price) x rig price. The brief's 'replacement share' is split into its two parts so each can be checked. Placeholder rate: (148 + 72) / 16,384 x 365 / 54 = 0.091 a year from the Llama 3 report.",
+      "sources": [
+        "llama3-paper"
+      ],
+      "version": "1",
+      "changeFromBrief": "Replacement share made explicit as GPU share times uncovered share. The brief's 27% over three years is 3 x 9%; compounding gives 1 - (1 - 0.091)^3 = 24.9%."
+    },
+    {
+      "id": "C5",
+      "section": "6.2C",
+      "name": "Power",
+      "expression": "Idle (fixed) = kW x idle share x hours x PUE x landed tariff. Active (per patient) = kW x (1 - idle share) x PUE x landed tariff / (patients per GPU-hour x GPUs)",
+      "units": "INR/month and INR/patient",
+      "inputs": [
+        "rigPowerKw",
+        "idlePowerFrac",
+        "pue",
+        "hoursPerMonth",
+        "state",
+        "gridTariffOverride",
+        "captiveOverride"
+      ],
+      "trace": [
+        "C5_idleEnergyPerMonth",
+        "C5_activeEnergyPerPatient",
+        "C5_powerPerMonthAtVolume",
+        "E1_landedTariff"
+      ],
+      "derivation": "The brief multiplied by a separate utilisation input while volume was also a slider, so the two could contradict each other. Here utilisation follows from volume, which also gives the rig its variable cost per patient used in the break-even. Idle draw and cooling overhead are added because a switched-on rig in a hospital server room draws both.",
+      "sources": [
+        "bharatdcim-state-tariffs"
+      ],
+      "version": "1",
+      "changeFromBrief": "Utilisation derived from volume; idle draw and PUE added; power split into fixed and variable parts."
+    },
+    {
+      "id": "E1",
+      "section": "6.2C",
+      "name": "Landed tariff",
+      "expression": "Grid: state table value, or your own figure. Captive: (PPA + wheeling + cross-subsidy surcharge + other) / (1 - losses)",
+      "units": "INR/kWh",
+      "inputs": [
+        "state",
+        "gridTariffOverride",
+        "captivePpa",
+        "captiveWheeling",
+        "captiveCss",
+        "captiveOther",
+        "captiveLossPct"
+      ],
+      "trace": [
+        "E1_landedTariff",
+        "E1_source"
+      ],
+      "derivation": "Losses are applied as a gross-up of every per-unit charge, which is a simplification: some orders levy wheeling on injected rather than delivered units.",
+      "sources": [
+        "ogd-state-electricity",
+        "niti-iced",
+        "bharatdcim-state-tariffs"
+      ],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "C8",
+      "section": "6.2C",
+      "name": "Owned rig fixed cost, capacity and rigs needed",
+      "expression": "Fixed per rig = capital + failure + idle power + maintenance. Capacity = patients per GPU-hour x GPUs x hours x duty cycle. Rigs = max(1, ceil(patients / capacity)). Owned monthly = rigs x fixed per rig + land + active power x patients",
+      "units": "INR/month",
+      "inputs": [
+        "rigGpuCount",
+        "dutyCycle",
+        "maintenanceInrPerMonth",
+        "landInrPerMonth"
+      ],
+      "trace": [
+        "C8_perRigFixed",
+        "C8_capacityPerRig",
+        "C8_rigsNeeded",
+        "C8_utilisation",
+        "C7_landPerMonth"
+      ],
+      "derivation": "The brief's capacity formula omitted the number of GPUs. Above one rig's capacity the brief called the result invalid; here whole extra rigs are bought and the output is flagged. Land is counted once per site.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "GPU count added to capacity; volumes above capacity priced as extra rigs and flagged."
+    },
+    {
+      "id": "B1",
+      "section": "6.2",
+      "name": "Buy-versus-rent break-even",
+      "expression": "N* = (fixed per rig + land) / (cloud cost per patient - rig active cost per patient), valid only if the denominator is positive; reported beyond capacity if N* exceeds one rig",
+      "units": "patients/month",
+      "inputs": [],
+      "trace": [],
+      "derivation": "Owned cost F + vN equals cloud cost cN at N = F / (c - v). Computed for both cloud routes, quoted and stress-tested.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "Computed against each cloud route separately and for the stress-tested prices."
+    },
+    {
+      "id": "P3",
+      "section": "6.3",
+      "name": "Review fraction and residual error",
+      "expression": "Residual error = e x (1 - min(1, k x f) x s). In accuracy mode, f = (1 - (1 - A) / e) / (s x k), clamped to 0..1 and flagged if unreachable. If unreachable, f = min(1, 1/k), the smallest fraction that already catches the most errors possible",
+      "units": "fraction",
+      "inputs": [
+        "reviewMode",
+        "reviewFraction",
+        "requiredAccuracy",
+        "modelErrorRate",
+        "reviewSensitivity",
+        "reviewTargeting"
+      ],
+      "trace": [
+        "P3_reviewFraction",
+        "P3_residualErrorRate",
+        "P3_accuracyAchieved",
+        "P3_reviewPerPatient"
+      ],
+      "derivation": "Implements the brief's requirement that required accuracy and review fraction be linked. Random review (k = 1) catches f x s of errors; targeted review concentrates errors in the reviewed set.",
+      "sources": [],
+      "version": "2",
+      "changeFromBrief": "The brief stated the link but gave no formula."
+    },
+    {
+      "id": "P4",
+      "section": "6.3",
+      "name": "Fixed people cost",
+      "expression": "capital recovery of the build cost over the amortisation months at the cost of money (build / months when the rate is zero) + recurring support",
+      "units": "INR/month",
+      "inputs": [
+        "buildCostInr",
+        "buildAmortMonths",
+        "supportInrPerMonth"
+      ],
+      "trace": [
+        "P1_buildAmortised",
+        "P2_support",
+        "P4_peopleFixed"
+      ],
+      "derivation": "Direct from the brief.",
+      "sources": [],
+      "version": "2",
+      "changeFromBrief": "The build cost carries the same cost of money as the rig; at zero it equals the brief."
+    },
+    {
+      "id": "V1",
+      "section": "6.4",
+      "name": "Initial validation and governance",
+      "expression": "Study = sample x (clinician min x rate + annotator min x rate) + analysis. Monthly = (study + governance) / amortisation months",
+      "units": "INR/month",
+      "inputs": [
+        "valSampleSize",
+        "clinMinPerCase",
+        "clinInrPerMin",
+        "annoMinPerCase",
+        "annoInrPerMin",
+        "valAnalysisInr",
+        "governanceInr",
+        "valAmortMonths"
+      ],
+      "trace": [
+        "V1_initialStudy",
+        "V1_perCase",
+        "V5_governance",
+        "V1_oneTimeAmortised"
+      ],
+      "derivation": "Direct from the brief, with governance added to the total.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "The brief listed governance costs but left them out of the total in 6.5."
+    },
+    {
+      "id": "V2",
+      "section": "6.4",
+      "name": "Re-validation",
+      "expression": "changes a year x re-validation sample x cost per reference answer / 12",
+      "units": "INR/month",
+      "inputs": [
+        "changesPerYear",
+        "revalSampleSize",
+        "costPerRefAnswerInr"
+      ],
+      "trace": [
+        "V2_costPerRefAnswer",
+        "V2_revalidationPerMonth"
+      ],
+      "derivation": "Direct from the brief. Cost per reference answer defaults to the initial study's per-record cost.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "V3",
+      "section": "6.4",
+      "name": "Ongoing monitoring",
+      "expression": "patients x audit fraction x audit minutes x cost per minute",
+      "units": "INR/month",
+      "inputs": [
+        "auditFraction",
+        "auditMinutes",
+        "auditInrPerMin"
+      ],
+      "trace": [
+        "V3_auditPerPatient",
+        "V3_monitoringPerMonth"
+      ],
+      "derivation": "Direct from the brief.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "V4",
+      "section": "6.4",
+      "name": "Error cost",
+      "expression": "patients x residual error rate x cost per uncaught error",
+      "units": "INR/month",
+      "inputs": [
+        "costPerUncaughtErrorInr"
+      ],
+      "trace": [
+        "V4_errorPerPatient",
+        "V4_errorPerMonth"
+      ],
+      "derivation": "Uses the residual error after review from P3, rather than a separate residual input, so review effort and error cost stay consistent.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "Residual error rate is derived, not entered separately."
+    },
+    {
+      "id": "T1",
+      "section": "6.5",
+      "name": "Total monthly AI cost and cost per patient",
+      "expression": "Total = compute + review + fixed people + validation (one-time amortised + re-validation + monitoring + errors). Per patient = total / patients (undefined at zero patients)",
+      "units": "INR/month, INR/patient",
+      "inputs": [],
+      "trace": [],
+      "derivation": "Direct from the brief, with governance included.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "M1",
+      "section": "6.5",
+      "name": "Manual cost per patient",
+      "expression": "manual minutes x cost per minute (or your direct figure) + manual error rate x cost per uncaught error, if both are set",
+      "units": "INR/patient",
+      "inputs": [
+        "manualMinutes",
+        "manualInrPerMin",
+        "manualCostPerPatientInr",
+        "manualErrorRate"
+      ],
+      "trace": [
+        "M1_manualPerPatient"
+      ],
+      "derivation": "The denominator must be like for like: if AI is charged for its errors, manual entry is charged for its own.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": "Manual error cost added as an option."
+    },
+    {
+      "id": "M2",
+      "section": "6.5",
+      "name": "Break-even versus manual",
+      "expression": "N = all AI fixed costs / (manual cost per patient - AI variable cost per patient), valid only if AI variable cost is below manual cost",
+      "units": "patients/month",
+      "inputs": [],
+      "trace": [],
+      "derivation": "The brief's numerator was fixed people cost alone. Validation fixed costs and, on the owned route, the rig's fixed cost are also fixed, so leaving them out understates the break-even volume. If AI is charged for its errors and no manual error rate is set, the result is labelled not like for like.",
+      "sources": [],
+      "version": "2",
+      "changeFromBrief": "Numerator widened to all fixed AI costs."
+    },
+    {
+      "id": "S1",
+      "section": "6.6",
+      "name": "Stress-tested cloud cost",
+      "expression": "quoted cloud price x repricing factor, for both the API and the rented GPU",
+      "units": "INR/patient",
+      "inputs": [
+        "repricingFactor"
+      ],
+      "trace": [
+        "C1_apiPerPatient_stressed",
+        "C2_rentPerPatient_stressed"
+      ],
+      "derivation": "Direct from the brief. For the IndiaAI tier the risk is a policy change in the subsidy rather than investor money, but the same factor is applied; the label says so.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "W6",
+      "section": "6.7",
+      "name": "Who pays",
+      "expression": "payer amount = total monthly cost x payer share; shares should sum to 100%",
+      "units": "INR/month",
+      "inputs": [
+        "payerPatient",
+        "payerHospital",
+        "payerInsurer",
+        "payerConsortium"
+      ],
+      "trace": [],
+      "derivation": "Direct from the brief. Shares that do not sum to 100% are flagged, not silently rescaled.",
+      "sources": [],
+      "version": "1",
+      "changeFromBrief": null
+    },
+    {
+      "id": "W7",
+      "section": "6.7",
+      "name": "Pooled scenario",
+      "expression": "Per centre = (fixed people + (1 - local share) x validation fixed) / centres + local share x validation fixed + compute at pooled volume / centres + variable review, audit and error cost for the centre. Under the on-premises rule each centre keeps its own rig, so compute is not pooled; centres are whole numbers",
+      "units": "INR/month per centre",
+      "inputs": [
+        "pooledCentres",
+        "perCentreVolume",
+        "localValidationShare"
+      ],
+      "trace": [
+        "W7_pooledPerPatient"
+      ],
+      "derivation": "The brief divided all fixed people and validation cost across centres. Validation must still be shown on each hospital's own documents, so a local share stays with each centre.",
+      "sources": [],
+      "version": "2",
+      "changeFromBrief": "Local validation share added."
+    }
   ]
 }

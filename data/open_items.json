@@ -1,16 +1,92 @@
 {
   "meta": {
     "description": "Open items and honest limits. Anything unresolved by the review council is recorded here with each side's reasoning; the author decides.",
-    "dataVersion": "2026-11-11"
+    "dataVersion": "2026-11-11b"
   },
   "items": [
-    { "id": "OI-1", "topic": "IndiaAI pricing", "status": "open", "detail": "Sources disagree: about Rs 65 (PIB average, except select high-end GPUs), Rs 67 to 100, and portal L1 bids of Rs 115.85 to 153 before subsidy. The portal rate list itself has not been opened.", "decision": "Pending verification on the portal." },
-    { "id": "OI-2", "topic": "State electricity tariffs", "status": "open", "detail": "No live API exists. Four states are seeded from a secondary source for the HT industrial category; a hospital may be billed under HT commercial or institutional. All other states fall back to a national working default of Rs 9 that has not been verified against any tariff order.", "decision": "Seed from SERC tariff orders by pull request; refresh annually." },
-    { "id": "OI-3", "topic": "GPU failure rate", "status": "open", "detail": "The 9% default annualises 54 days of one operator's training cluster and counts job interruptions, not replacements. No Indian or inference figure exists.", "decision": "Kept as a flagged placeholder. Whether an open, Backblaze-style failure-log dataset from Indian institutional clusters belongs in this project or a separate paper is undecided." },
-    { "id": "OI-4", "topic": "Unsourced inputs", "status": "open", "detail": "Purchase price, utilisation, throughput, review fraction, manual baseline, cost per uncaught error and the repricing factor have no authoritative source. Published validation costs for Indian hospital deployments are scarce.", "decision": "User inputs, flagged on every output while left at their illustrative defaults." },
-    { "id": "OI-5", "topic": "Hardware life default", "status": "decided-pending-author", "detail": "The brief cited 3 years under Schedule II for computers. Schedule II Part C item XII gives 6 years for servers and networks and 3 years for end-user devices. A GPU server is a server. The default is set to 6 years with the history recorded; a user can set 3.", "decision": "Author to confirm." },
-    { "id": "OI-6", "topic": "Income-tax Act, 2025", "status": "open", "detail": "The Income-tax Act, 2025 replaced the 1961 Act from 1 April 2026. Secondary sources agree computers stay at 40% WDV but disagree on the section number (33, 34 or 35).", "decision": "Cite the Gazette text once confirmed." },
-    { "id": "OI-7", "topic": "GST on cloud bills", "status": "open", "detail": "Defaulted to 18% as non-recoverable because hospital healthcare services are GST-exempt and input tax credit is generally unavailable. Treatment depends on the hospital's structure.", "decision": "Confirm with a tax adviser; the input can be set to zero." },
-    { "id": "OI-8", "topic": "Licence and data reviewer", "status": "open", "detail": "Licence set to MIT. The reviewer for contributed data has not been assigned.", "decision": "Author to assign." }
+    {
+      "id": "OI-1",
+      "topic": "IndiaAI pricing",
+      "status": "open",
+      "detail": "Sources disagree: Rs 65 (PIB headline), about Rs 65 to 100 in secondary reports (the brief: 67 to 92), and portal L1 bids of Rs 115.85 to 153 before subsidy. Portal access requires eligibility that most private hospitals lack, so the default tier is Indian commercial. The portal rate list itself has not been opened.",
+      "decision": "Pending verification on the portal."
+    },
+    {
+      "id": "OI-2",
+      "topic": "State electricity tariffs",
+      "status": "open",
+      "detail": "No live API exists. Four states are seeded from a secondary source for the HT industrial category; a hospital may be billed under HT commercial or institutional. All other states fall back to a national working default of Rs 9 that has not been verified against any tariff order. The seeded figures come from a secondary blog; the category is HT industrial at a data-centre load profile, and two states bill per kVAh.",
+      "decision": "Seed from SERC tariff orders by pull request; refresh annually."
+    },
+    {
+      "id": "OI-3",
+      "topic": "GPU failure rate",
+      "status": "open",
+      "detail": "The 9% default annualises 54 days of one operator's training cluster and counts job interruptions, not replacements. No Indian or inference figure exists.",
+      "decision": "Kept as a flagged placeholder. Whether an open, Backblaze-style failure-log dataset from Indian institutional clusters belongs in this project or a separate paper is undecided."
+    },
+    {
+      "id": "OI-4",
+      "topic": "Unsourced inputs",
+      "status": "open",
+      "detail": "Purchase price, utilisation, throughput, review fraction, manual baseline, cost per uncaught error and the repricing factor have no authoritative source. Published validation costs for Indian hospital deployments are scarce.",
+      "decision": "User inputs, flagged on every output while left at their illustrative defaults."
+    },
+    {
+      "id": "OI-5",
+      "topic": "Hardware life default",
+      "status": "decided-pending-author",
+      "detail": "The brief cited 3 years under Schedule II for computers. Schedule II Part C item XII gives 6 years for servers and networks and 3 years for end-user devices. A GPU server is a server. The default is set to 6 years with the history recorded; a user can set 3. Review council: at 6 years the default buy-versus-rent break-even (owned against rented GPU) falls inside one rig's capacity; at 3 years it does not, so the default changes the verdict. Accounting life is not GPU obsolescence. The headline states the life used and the 3-year result. Break-even, owned rig against rented GPU, at shipped defaults: 3 years with IndiaAI Rs 65, 27,074 patients a month (beyond one rig's 26,280); 6 years with IndiaAI, 17,781; 3 years with Indian commercial H100, 4,434; 6 years with commercial H100, 2,912.",
+      "decision": "Kept at 6 years (the statutory class for servers), shown on the front screen with the 3-year result beside it. Author to decide together with OI-11."
+    },
+    {
+      "id": "OI-6",
+      "topic": "Income-tax Act, 2025",
+      "status": "open",
+      "detail": "The Income-tax Act, 2025 replaced the 1961 Act from 1 April 2026. Secondary sources agree computers stay at 40% WDV but disagree on the section number (33, 34 or 35).",
+      "decision": "Cite the Gazette text once confirmed."
+    },
+    {
+      "id": "OI-7",
+      "topic": "GST on cloud bills",
+      "status": "open",
+      "detail": "Defaulted to 18% as non-recoverable because hospital healthcare services are GST-exempt and input tax credit is generally unavailable. Treatment depends on the hospital's structure.",
+      "decision": "Confirm with a tax adviser; the input can be set to zero."
+    },
+    {
+      "id": "OI-8",
+      "topic": "Licence and data reviewer",
+      "status": "open",
+      "detail": "Licence set to MIT. The reviewer for contributed data has not been assigned.",
+      "decision": "Author to assign."
+    },
+    {
+      "id": "OI-9",
+      "topic": "Hardware classes in buy versus rent",
+      "status": "open",
+      "detail": "Every priced rental row is H100-class while the owned default is an older two-GPU rig, so the default comparison is between different hardware classes. No sourced rental price for an older GPU was available during the build.",
+      "decision": "Invite sourced rows for L4, L40S, A100 and T4; until then the throughput inputs for each route must be measured separately."
+    },
+    {
+      "id": "OI-10",
+      "topic": "Which entities the statutes bind",
+      "status": "open",
+      "detail": "Schedule II binds companies, and 40% WDV matters only to taxpayers. Trust, society, government and tax-exempt charitable hospitals are not bound by either.",
+      "decision": "Effective life is a user input; the statutory value is a default, not a rule for every hospital."
+    },
+    {
+      "id": "OI-11",
+      "topic": "Default rented GPU tier",
+      "status": "open",
+      "detail": "Reviewer B proposed Indian commercial H100 as the default because IndiaAI eligibility excludes most private hospitals. Reviewers A and B (round two) objected that this makes top-end hardware the rental default, contrary to brief section 3, and that together with a 6-year life it moves the buy-versus-rent verdict far from the brief's defaults (see OI-5 for the four combinations).",
+      "decision": "Kept at the brief's IndiaAI rate, labelled 'eligibility required' in the selector. Author to decide."
+    },
+    {
+      "id": "OI-12",
+      "topic": "Unconfirmed price details",
+      "status": "open",
+      "detail": "PIB's Rs 65 is inconsistent with the portal H100 L1 bid of Rs 153 under a 40% subsidy cap (at least Rs 91.8), so it cannot be an H100 rate. GST treatment of the AWS capacity-block figure is unconfirmed.",
+      "decision": "Verify on the IndiaAI portal and the AWS price page."
+    }
   ]
 }

@@ -93,6 +93,9 @@
           },
           "note": {
             "type": "string"
+          },
+          "verification": {
+            "type": "string"
           }
         },
         "additionalProperties": false

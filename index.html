@@ -18,7 +18,7 @@
     <div class="nums">
       <div class="num"><div class="v" id="h-pp">…</div><div class="l">AI cost per patient</div></div>
       <div class="num"><div class="v" id="h-month">…</div><div class="l">AI cost per month</div></div>
-      <div class="num"><div class="v" id="h-manual">…</div><div class="l">Manual entry per patient</div></div>
+      <div class="num"><div class="v" id="h-manual">…</div><div class="l" id="h-manual-l">Manual entry per patient</div></div>
     </div>
     <p class="lead" id="h-sentence"></p>
     <p id="h-buyrent"></p>
@@ -38,12 +38,12 @@
       </div>
       <div class="hint">The slider runs from 10 to 10 lakh patients on a log scale; type any figure in the box.</div>
     </div>
-    <div class="ctl"><label for="c-state">State, for grid electricity</label><select id="c-state"></select><div class="hint" id="c-state-hint"></div></div>
+    <div class="ctl"><label for="c-state">State, for the electricity price</label><select id="c-state"></select><div class="hint" id="c-state-hint"></div></div>
     <div class="ctl"><label for="c-route">Route used for the headline</label><select id="c-route"></select></div>
     <div class="ctl"><label for="c-residency">Data-residency rule</label><select id="c-residency"></select></div>
-    <div class="ctl"><label for="c-tier">Rented GPU tier</label><select id="c-tier"></select></div>
-    <div class="ctl"><label for="c-review">Share of outputs reviewed by staff: <b id="c-review-v"></b></label><div class="row"><input type="range" id="c-review" min="0" max="1" step="0.01"></div><div class="hint">The most sensitive input. Measure it in a pilot.</div></div>
-    <div class="ctl"><label for="c-reprice">Cloud repricing scenario: <b id="c-reprice-v"></b></label><div class="row"><input type="range" id="c-reprice" min="0.5" max="5" step="0.1"></div><div class="hint">What if subsidised cloud prices end? A scenario, not a forecast.</div></div>
+    <div class="ctl"><label for="c-tier">Rented computer (GPU) price tier</label><select id="c-tier"></select></div>
+    <div class="ctl"><label for="c-review">Share of outputs reviewed by staff: <b id="c-review-v"></b></label><div class="row"><input type="range" id="c-review" min="0" max="1" step="0.01"></div><div class="hint" id="c-review-hint">The most sensitive input. Measure it in a pilot.</div></div>
+    <div class="ctl"><label for="c-reprice">What if cloud prices change? <b id="c-reprice-v"></b></label><div class="row"><input type="range" id="c-reprice" min="0.5" max="5" step="0.1"></div><div class="hint">What if subsidised cloud prices end? A scenario, not a forecast.</div></div>
   </section>
 
   <section class="charts">
@@ -61,7 +61,7 @@
     </article>
     <article class="card" id="card-payers">
       <h2>Who pays</h2>
-      <p class="sub">The monthly total for the headline route, split by the payer shares you set under the working.</p>
+      <p class="sub" id="payers-sub">The monthly total for the headline route, split by the payer shares you set under the working.</p>
       <div class="canvas-box"><canvas id="ch-payers" role="img" aria-label="Bar chart of monthly cost by payer"></canvas></div>
       <div class="actions"><span class="sp"></span></div>
     </article>

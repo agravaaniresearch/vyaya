@@ -1,7 +1,7 @@
 {
   "meta": {
     "description": "Every source cited by a default, a formula or a data row. 'howRead' records how the source was actually checked, so nobody mistakes a search snippet for a verified reading. Wikipedia is not an acceptable source anywhere in this project.",
-    "dataVersion": "2026-11-11"
+    "dataVersion": "2026-11-11b"
   },
   "sources": [
     {
@@ -11,8 +11,8 @@
       "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/feb/doc2026210784401.pdf",
       "type": "government",
       "accessed": "2026-11-11",
-      "howRead": "search snippet",
-      "notes": "States that 38,000+ GPUs are available at Rs 65 per hour. Secondary reports say PIB describes this as an average 'except for select high-end GPUs'. Open the PDF and the IndiaAI portal rate list before relying on it."
+      "howRead": "PDF opened by review council",
+      "notes": "States that 38,000+ high-end GPUs are available at Rs 65 per hour. It does not describe this as an average and lists no exceptions; the 'average, except select high-end GPUs' wording comes from secondary reports of a later PIB release."
     },
     {
       "id": "indiaai-compute-portal",
@@ -47,12 +47,12 @@
     {
       "id": "companies-act-schedule-ii",
       "title": "Companies Act, 2013, Schedule II, Part C (useful lives): Computers and data processing units",
-      "publisher": "Ministry of Corporate Affairs (bare act text via TaxGuru extract)",
-      "url": "https://taxguru.in/company-law/depreciation-companies-act-2013-brief-analysis.html",
+      "publisher": "Companies Act, 2013 bare text (AdvocateKhoj)",
+      "url": "https://www.advocatekhoj.com/library/bareacts/companies2013/schedule2.php",
       "type": "statute",
       "accessed": "2026-11-11",
-      "howRead": "search snippet, corroborated by an EPFO circular",
-      "notes": "Part C item XII: (i) Servers and networks, 6 years; (ii) End user devices such as desktops and laptops, 3 years. Residual value ordinarily not more than 5% of original cost. A GPU server falls under (i). Confirm against the MCA gazette text."
+      "howRead": "bare text read on a secondary host by the review council; MCA gazette not opened",
+      "notes": "Part C item XII: (i) Servers and networks, 6 years; (ii) End user devices such as desktops and laptops, 3 years. Residual value ordinarily not more than 5% of original cost. Binds companies only. Confirm against the MCA gazette text."
     },
     {
       "id": "epfo-depreciation-circular-2026",
@@ -91,8 +91,8 @@
       "url": "https://arxiv.org/abs/2407.21783",
       "type": "report",
       "accessed": "2026-11-11",
-      "howRead": "section read through a fetch tool (HTML v3)",
-      "notes": "54-day snapshot; 466 interruptions, 419 unexpected; up to 16,384 H100 GPUs; Faulty GPU 148, GPU HBM3 memory 72, GPU SRAM 19, GPU system processor 17. About 78% of unexpected interruptions attributed to confirmed or suspected hardware. These are job interruptions, not confirmed replacements."
+      "howRead": "section 3.3.4 read via a fetch tool (partial page) by the build and the review council",
+      "notes": "54-day snapshot; 466 interruptions, 419 unexpected; up to 16K H100 GPUs (16,384 used for the annualisation); Faulty GPU 148, GPU HBM3 memory 72, GPU SRAM 19, GPU system processor 17. About 78% of unexpected interruptions attributed to confirmed or suspected hardware. These are job interruptions, not confirmed replacements."
     },
     {
       "id": "bharatdcim-state-tariffs",

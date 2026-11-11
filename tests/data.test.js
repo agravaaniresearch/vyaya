@@ -48,10 +48,10 @@ test('every assumption belongs to a declared group and ids are unique', () => {
 
 test('sourced defaults carry a source and a verification date', () => {
   data.assumptions.assumptions.filter(a => a.status === 'statutory' || a.status === 'secondary').forEach(a => {
-    assert.ok(a.sources.length > 0, a.id); assert.ok(a.lastVerified, a.id);
+    assert.ok(a.sources.length > 0, a.id); assert.ok(a.lastVerified || a.verification, a.id + ' needs lastVerified or a verification note');
   });
   data.tariffs.rows.filter(r => r.landedInrPerKwh !== null && r.status !== 'placeholder').forEach(r => {
-    assert.ok(r.sources.length > 0 && r.lastVerified, r.id);
+    assert.ok(r.sources.length > 0 && (r.lastVerified || r.verification), r.id);
   });
 });
 

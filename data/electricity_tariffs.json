@@ -1,7 +1,7 @@
 {
   "meta": {
     "description": "State-wise landed grid electricity tariff in rupees per kWh, covering energy charge, demand or fixed charge spread over units, fuel adjustment, electricity duty and surcharges. Commercial or HT categories only: domestic rates are deliberately excluded. Seeded from open and secondary data; the source of truth is each State Electricity Regulatory Commission's annual tariff order. Refresh annually.",
-    "dataVersion": "2026-11-11",
+    "dataVersion": "2026-11-11b",
     "unit": "INR/kWh"
   },
   "rows": [
@@ -209,9 +209,10 @@
       "sources": [
         "bharatdcim-state-tariffs"
       ],
-      "lastVerified": "2026-11-11",
+      "lastVerified": null,
       "tariffYear": "2025-26",
-      "note": "BESCOM HT-2(a), FY 2025-26; effective all-in for a 24x7 load including demand charges. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+      "note": "BESCOM HT-2(a), FY 2025-26; effective all-in for a 24x7 load including demand charges. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order. Source is a secondary blog citing the SERC orders; Maharashtra and Telangana bill per kVAh, so a power-factor conversion is implied but not stated.",
+      "verification": "search snippet only"
     },
     {
       "id": "kl",
@@ -271,9 +272,10 @@
       "sources": [
         "bharatdcim-state-tariffs"
       ],
-      "lastVerified": "2026-11-11",
+      "lastVerified": null,
       "tariffYear": "2025-26",
-      "note": "MSEDCL HT industrial, FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+      "note": "MSEDCL HT industrial, FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order. Source is a secondary blog citing the SERC orders; Maharashtra and Telangana bill per kVAh, so a power-factor conversion is implied but not stated.",
+      "verification": "search snippet only"
     },
     {
       "id": "mn",
@@ -393,9 +395,10 @@
       "sources": [
         "bharatdcim-state-tariffs"
       ],
-      "lastVerified": "2026-11-11",
+      "lastVerified": null,
       "tariffYear": "2025-26",
-      "note": "TANGEDCO HT industrial, FY 2025-26; effective all-in for a 24x7 load. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+      "note": "TANGEDCO HT industrial, FY 2025-26; effective all-in for a 24x7 load. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order. Source is a secondary blog citing the SERC orders; Maharashtra and Telangana bill per kVAh, so a power-factor conversion is implied but not stated.",
+      "verification": "search snippet only"
     },
     {
       "id": "ts",
@@ -407,9 +410,10 @@
       "sources": [
         "bharatdcim-state-tariffs"
       ],
-      "lastVerified": "2026-11-11",
+      "lastVerified": null,
       "tariffYear": "2025-26",
-      "note": "TGSPDCL HT-I(A), FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+      "note": "TGSPDCL HT-I(A), FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order. Source is a secondary blog citing the SERC orders; Maharashtra and Telangana bill per kVAh, so a power-factor conversion is implied but not stated.",
+      "verification": "search snippet only"
     },
     {
       "id": "tr",

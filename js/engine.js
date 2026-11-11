@@ -14,7 +14,7 @@
 (function (root) {
   'use strict';
 
-  var ENGINE_VERSION = '0.1.0';
+  var ENGINE_VERSION = '0.2.0';
   var HOURS_PER_MONTH_DEFAULT = 8760 / 12; // 730
 
   function num(x) { return typeof x === 'number' && isFinite(x); }
@@ -75,13 +75,13 @@
       ? patientsPerGpuHourFromTps(w.tin, w.tout, i.rentPrefillTps, i.rentDecodeTps)
       : i.rentPatientsPerGpuHour;
     var eff = clamp(i.rentEfficiency, 0.01, 1);
-    var perPatient = safeDiv(i.rentRateInr * cloudTax(i) * k, ppgh * eff);
+    var perPatient = num(i.rentRateInr) ? safeDiv(i.rentRateInr * cloudTax(i) * k, ppgh * eff) : null;
     t['C2_rentPatientsPerGpuHour'] = ppgh;
     t['C2_rentPerPatient' + suffix] = perPatient;
     return {
       id: 'rented', label: 'Rented GPU',
       available: !blocked && perPatient !== null,
-      blockedReason: blocked ? (i.residency === 'onprem' ? 'Data may not leave the hospital.' : 'Data must stay in India and this GPU tier is not marked as India-hosted.') : (perPatient === null ? 'Throughput is missing or zero.' : null),
+      blockedReason: blocked ? (i.residency === 'onprem' ? 'Data may not leave the hospital.' : 'Data must stay in India and this GPU tier is not marked as India-hosted.') : (perPatient === null ? (num(i.rentRateInr) ? 'Throughput is missing or zero.' : 'No GPU-hour price is set for this tier.') : null),
       variablePerPatient: perPatient, fixedMonthly: 0, capacityPerUnit: null
     };
   }
@@ -120,7 +120,7 @@
     var utilisation = capacity > 0 ? N / (capacity * rigs) : null;
 
     t.C3_capitalPerMonth = capital;
-    t.C3_depreciationStraightLine = (i.rigPriceInr * (1 - clamp(i.residualPct / 100, 0, 1))) / Math.max(1, i.lifeYears * 12);
+    t.C3_depreciationStraightLine = (i.rigPriceInr * (1 - clamp(i.residualPct / 100, 0, 1))) / Math.max(1, Math.round(i.lifeYears * 12));
     t.C3_taxDepreciationYear1 = i.rigPriceInr * (i.taxWdvPct / 100);
     t.C4_failurePerMonth = failure;
     t.C5_idleEnergyPerMonth = idleEnergy;
@@ -172,8 +172,8 @@
       else if (s === 0) { f = 1; feasible = false; note = 'Review catches nothing (sensitivity is zero), so the required accuracy cannot be reached.'; }
       else {
         var needed = (1 - target / e) / (s * k);
-        if (needed * k > 1 + 1e-12) { feasible = false; note = 'Even reviewing every output cannot reach the required accuracy with this error rate and review sensitivity.'; }
-        f = clamp(needed, 0, 1);
+        if (needed * k > 1 + 1e-12) { feasible = false; note = 'Even reviewing every output cannot reach the required accuracy with this error rate and review sensitivity.'; f = Math.min(1, 1 / k); }
+        else f = clamp(needed, 0, 1);
       }
     } else {
       f = clamp(i.reviewFraction, 0, 1);
@@ -208,8 +208,9 @@
     // People
     var rv = reviewModel(i, t);
     var reviewPerPatient = rv.fraction * i.reviewMinutes * i.reviewStaffInrPerMin;
-    var peopleFixed = safeDiv(i.buildCostInr, i.buildAmortMonths) + (i.supportInrPerMonth || 0);
-    t.P1_buildAmortised = safeDiv(i.buildCostInr, i.buildAmortMonths);
+    var buildMonthly = capitalPerMonth(i.buildCostInr, i.buildAmortMonths / 12, 0, i.costOfCapitalPct);
+    var peopleFixed = buildMonthly + (i.supportInrPerMonth || 0);
+    t.P1_buildAmortised = buildMonthly;
     t.P2_support = i.supportInrPerMonth || 0;
     t.P3_reviewPerPatient = reviewPerPatient;
     t.P4_peopleFixed = peopleFixed;
@@ -257,6 +258,7 @@
         manualBE = { value: nb, reason: null };
         if (route.id === 'owned' && nb > route.capacityPerUnit) { manualBE.beyondCapacity = true; manualBE.reason = 'Break-even lies beyond one rig\'s capacity; more rigs would be needed and the figure is indicative only.'; }
       }
+      if (errorIncluded && isBlank(i.manualErrorRate)) { manualBE.notLikeForLike = true; manualBE.reason = (manualBE.reason ? manualBE.reason + ' ' : '') + 'Not like for like: AI is charged for its errors and manual entry is not.'; }
       return {
         id: route.id, label: route.label, available: true,
         monthly: {
@@ -306,19 +308,22 @@
 
     // Pooled scenario
     var pooled = null;
-    if (i.pooledCentres > 1 && i.perCentreVolume > 0 && !opts.noPool) {
-      var poolInputs = Object.assign({}, i, { patientsPerMonth: i.pooledCentres * i.perCentreVolume });
+    var centres = Math.floor(i.pooledCentres || 1);
+    if (centres > 1 && i.perCentreVolume > 0 && !opts.noPool) {
+      var poolInputs = Object.assign({}, i, { patientsPerMonth: centres * i.perCentreVolume });
       var pr = calculate(poolInputs, { noPool: true });
       var L = clamp(i.localValidationShare, 0, 1);
       var pc = pr.chosen;
       if (pc && pc.available) {
         var sharedFixed = pr.trace.P4_peopleFixed + (1 - L) * pr.trace.V_validationFixed;
         var localFixed = L * pr.trace.V_validationFixed;
-        var perCentreMonthly = sharedFixed / i.pooledCentres + localFixed + pc.monthly.compute / i.pooledCentres
-          + (pc.monthly.review + pc.monthly.monitoring + pc.monthly.errors) / i.pooledCentres;
         var single = calculate(Object.assign({}, i, { patientsPerMonth: i.perCentreVolume }), { noPool: true }).chosen;
+        // Under the on-premises rule each hospital keeps its own rig, so compute is not pooled.
+        var computeShare = i.residency === 'onprem' && single && single.available ? single.monthly.compute : pc.monthly.compute / centres;
+        var perCentreMonthly = sharedFixed / centres + localFixed + computeShare
+          + (pc.monthly.review + pc.monthly.monitoring + pc.monthly.errors) / centres;
         pooled = {
-          centres: i.pooledCentres, perCentreVolume: i.perCentreVolume,
+          centres: centres, computePooled: i.residency !== 'onprem', perCentreVolume: i.perCentreVolume,
           perCentreMonthly: perCentreMonthly, perPatient: perCentreMonthly / i.perCentreVolume,
           singleCentrePerPatient: single && single.available ? single.perPatient : null,
           route: pc.id
@@ -330,17 +335,19 @@
     // Not included and placeholder flags
     var notIncluded = [];
     if (isBlank(i.landInrPerMonth)) notIncluded.push('Land and building (left blank)');
-    if (!(i.costOfCapitalPct > 0)) notIncluded.push('Cost of money (interest on the rig and build cost is set to zero)');
+    if (!(i.costOfCapitalPct > 0)) notIncluded.push('Cost of money (no interest is charged on the rig or the build cost)');
     if (!errorIncluded) notIncluded.push('Cost of uncaught errors (no scenario value set)');
     if (isBlank(i.manualErrorRate)) notIncluded.push('Errors made by manual entry (no manual error rate set)');
     if (!(i.cloudGstPct > 0)) notIncluded.push('GST on cloud services (set to zero)');
     (i.alwaysExcluded || []).forEach(function (x) { notIncluded.push(x); });
 
+    if (errorIncluded && isBlank(i.manualErrorRate)) flags.push({ level: 'warn', text: 'AI is charged for its uncaught errors but manual entry is not, because no manual error rate is set. Set one for a like-for-like comparison.' });
     if (!rv.feasible) flags.push({ level: 'warn', text: rv.note });
     if (rv.note && rv.feasible) flags.push({ level: 'info', text: rv.note });
-    if (quoted.owned.exceedsOneRig) flags.push({ level: 'info', text: 'This volume needs ' + quoted.owned.rigs + ' rigs; the owned-rig cost assumes whole rigs are bought.' });
+    if (quoted.owned.exceedsOneRig) flags.push({ level: 'info', text: 'If you buy instead: this volume needs ' + quoted.owned.rigs + ' rigs, and the owned-rig cost assumes whole rigs are bought.' });
     if (N === 0) flags.push({ level: 'info', text: 'With zero patients the cost per patient is undefined; monthly fixed costs still apply.' });
     if (k === 1) flags.push({ level: 'info', text: 'Repricing factor is 1, so stress-tested cloud costs equal quoted costs.' });
+    if (i.correctedInputs && i.correctedInputs.length) flags.push({ level: 'warn', text: 'Some inputs were outside their allowed range and were adjusted: ' + i.correctedInputs.join('; ') + '.' });
     if (!num(i.lifeYears) || i.lifeYears <= 0) flags.push({ level: 'warn', text: 'Effective hardware life must be above zero.' });
 
     return {
@@ -395,8 +402,21 @@
 
   function buildInputs(data, values) {
     var v = Object.assign(defaultValues(data), values || {});
+    var meta = { corrected: [] };
+    // Clamp every numeric input to its declared range; replace non-numbers with the default.
+    data.assumptions.assumptions.forEach(function (a) {
+      if (a.type === 'bool' || a.type === 'select') return;
+      var x = v[a.id];
+      if (x === null || x === undefined || x === '') { if (!a.nullable) { v[a.id] = a.value; } else v[a.id] = null; return; }
+      x = typeof x === 'number' ? x : Number(x);
+      if (!isFinite(x)) { v[a.id] = a.value; meta.corrected.push(a.label + ' was not a number; reset to the default, ' + a.value); return; }
+      var y = x;
+      if (num(a.min)) y = Math.max(a.min, y);
+      if (num(a.max)) y = Math.min(a.max, y);
+      if (y !== x) meta.corrected.push(a.label + ' was ' + x + '; set to the ' + (y > x ? 'minimum' : 'maximum') + ', ' + y);
+      v[a.id] = y;
+    });
     var inp = Object.assign({}, v);
-    var meta = {};
 
     var rows = data.tariffs.rows;
     var nat = rows.filter(function (r) { return r.id === 'national-default'; })[0];
@@ -415,6 +435,7 @@
 
     inp.payerShares = { patient: v.payerPatient, hospital: v.payerHospital, insurer: v.payerInsurer, consortium: v.payerConsortium };
     inp.alwaysExcluded = data.assumptions.alwaysExcluded || [];
+    inp.correctedInputs = meta.corrected;
     return { inputs: inp, meta: meta, values: v };
   }
 

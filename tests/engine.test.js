@@ -204,3 +204,47 @@ test('Cost per patient falls with volume on every route', () => {
   const s = E.sweep(E.buildInputs(data, {}).inputs, [100, 1000, 10000]);
   for (const k of ['api', 'rented', 'owned']) assert.ok(s[0][k] > s[1][k] && s[1][k] > s[2][k]);
 });
+
+// ---- Regression tests from the review council ----
+
+test('Council A1: custom tier with no price makes the rented route unavailable, not free', () => {
+  const r = run({ rentTier: 'custom' });
+  assert.equal(r.routes.rented.available, false);
+  assert.match(r.routes.rented.reason, /No GPU-hour price/);
+  assert.notEqual(r.cheapest.id, 'rented');
+});
+
+test('Council A2: out-of-range and non-numeric inputs are clamped and named, blanks stay blank', () => {
+  const r = run({ buildAmortMonths: 0, costOfCapitalPct: -1200, pagesPerPatient: NaN, payerPatient: -50, landInrPerMonth: null });
+  assert.doesNotMatch(JSON.stringify(r), /NaN|Infinity/);
+  const f = r.flags.find(x => /adjusted/.test(x.text));
+  assert.ok(f && /Months to spread the build cost over was 0; set to the minimum, 1/.test(f.text));
+  assert.ok(r.notIncluded.some(x => /Land/.test(x)));
+  assert.ok(close(r.trace.P1_buildAmortised, 2500000));
+});
+
+test('Council A2: build cost with interest reduces to build / months at zero rate', () => {
+  assert.ok(close(run({ costOfCapitalPct: 0 }).trace.P1_buildAmortised, 2500000 / 36));
+  assert.ok(run({ costOfCapitalPct: 10 }).trace.P1_buildAmortised > 2500000 / 36);
+  assert.ok(!run({ costOfCapitalPct: 10 }).notIncluded.some(x => /Cost of money/.test(x)));
+});
+
+test('Council A4: error cost without a manual error rate is flagged and labelled not like for like', () => {
+  const r = run({ costPerUncaughtErrorInr: 2000 });
+  assert.ok(r.flags.some(f => /like-for-like/.test(f.text)));
+  assert.equal(r.routes.api.manualBreakEven.notLikeForLike, true);
+});
+
+test('Council A5: infeasible targeted review bills only what can still catch errors', () => {
+  const r = run({ reviewMode: 'accuracy', modelErrorRate: 0.5, requiredAccuracy: 0.9, reviewSensitivity: 0.5, reviewTargeting: 4 });
+  assert.equal(r.review.feasible, false);
+  assert.ok(close(r.review.fraction, 0.25));
+});
+
+test('Council A6: pooling under the on-premises rule keeps a rig at each centre', () => {
+  const pooledOnprem = run({ residency: 'onprem', pooledCentres: 5, perCentreVolume: 1000 });
+  const single = run({ residency: 'onprem', patientsPerMonth: 1000 });
+  assert.equal(pooledOnprem.pooled.computePooled, false);
+  assert.ok(pooledOnprem.pooled.perCentreMonthly > single.routes.owned.monthly.compute);
+  assert.equal(run({ pooledCentres: 1.9 }).pooled, null);
+});

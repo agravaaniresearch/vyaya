@@ -20,7 +20,7 @@
     return inr(x, { dp: 0 });
   }
   function count(x) { return (x === null || !isFinite(x)) ? '—' : Math.round(x).toLocaleString('en-IN'); }
-  function pct(x) { return (x === null || !isFinite(x)) ? '—' : (x * 100).toLocaleString('en-IN', { maximumFractionDigits: x < 0.1 ? 1 : 0 }) + '%'; }
+  function pct(x) { if (x === null || !isFinite(x)) return '—'; if (x > 0 && x < 0.001) return 'under 0.1%'; return (x * 100).toLocaleString('en-IN', { maximumFractionDigits: x < 0.1 ? 1 : 0 }) + '%'; }
   function esc(s) { return String(s === null || s === undefined ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function $(id) { return document.getElementById(id); }
 
@@ -125,12 +125,20 @@
     if (!cloud.length) return 'Only buying a rig is allowed under the data-residency rule, so there is no buy-versus-rent choice.';
     var bestCloud = cloud.reduce(function (a, b) { return a.monthly.total <= b.monthly.total ? a : b; });
     var be = bestCloud.id === 'api' ? r.breakEven.ownedVsApi : r.breakEven.ownedVsRented;
-    var winner = owned.monthly.total < bestCloud.monthly.total ? 'Buying a rig is cheaper than renting' : 'Renting (' + routeName(bestCloud.id).replace(/^an? /, '') + ') is cheaper than buying a rig';
+    var cloudName = routeName(bestCloud.id).replace(/^an? /, '');
+    var winner = owned.monthly.total < bestCloud.monthly.total ? 'Buying a rig is cheaper than renting (' + cloudName + ')' : 'Renting (' + cloudName + ') is cheaper than buying a rig';
     var tail;
     if (be.value === null) tail = ' ' + be.reason;
-    else if (be.beyondCapacity) tail = ' Buying would only match renting at about ' + count(be.value) + ' patients a month, which is beyond one rig\'s capacity of ' + count(r.trace.C8_capacityPerRig) + ', so at full use the rig still costs more.';
+    else if (be.beyondCapacity) tail = ' Buying never becomes cheaper than the ' + cloudName + ': even a fully used rig (' + count(r.trace.C8_capacityPerRig) + ' patients a month) costs more.';
     else tail = ' The two break even at about ' + count(be.value) + ' patients a month.';
-    return '<b>Buy or rent:</b> ' + winner + ' at this volume.' + tail;
+    var life = S.values.lifeYears, lifeNote = '';
+    if (life !== 3) {
+      var alt = E.calculate(E.buildInputs(S.data, Object.assign({}, S.values, { lifeYears: 3 })).inputs);
+      var abe = bestCloud.id === 'api' ? alt.breakEven.ownedVsApi : alt.breakEven.ownedVsRented;
+      lifeNote = ' This spreads the rig over ' + life + ' years (with 3 years: ' + (abe.value === null || abe.beyondCapacity ? 'no break-even within one rig' : 'break-even at about ' + count(abe.value)) + ').';
+    } else lifeNote = ' This spreads the rig over 3 years.';
+    var hw = bestCloud.id === 'rented' && /H100|Mixed/.test(S.built.meta.tier.gpu) ? ' Rented prices are for newer, faster GPUs than the default owned rig.' : '';
+    return '<b>Buy or rent:</b> ' + winner + ' at this volume.' + tail + lifeNote + hw;
   }
 
   function renderHeadline() {
@@ -138,32 +146,43 @@
     $('h-pp').textContent = c && c.available && c.perPatient !== null ? inr(c.perPatient) : '—';
     $('h-month').textContent = c && c.available ? inrWords(c.monthly.total) : '—';
     $('h-manual').textContent = inr(r.manualPerPatient);
+    var mIll = S.values.manualCostPerPatientInr === null && E.placeholdersInUse(S.data, S.values).some(function (a) { return a.group === 'manual'; });
+    $('h-manual-l').textContent = 'Manual entry per patient' + (mIll ? ' (illustrative: replace with your own figure)' : '');
     if (!c || !c.available) {
       $('h-sentence').textContent = 'No route can be costed with the current settings. ' + (c && c.reason ? c.reason : '');
       $('h-buyrent').innerHTML = ''; $('h-manualline').textContent = ''; $('h-share').textContent = '';
     } else {
       $('h-sentence').innerHTML = (N > 0
-        ? 'At <b>' + count(N) + '</b> patients a month, extracting their reports with AI would cost about <b>' + inr(c.perPatient) + '</b> per patient, or <b>' + inrWords(c.monthly.total) + '</b> a month, using ' + routeName(c.id) + (S.values.route === 'cheapest' ? ', the cheapest route allowed' : '') + '.'
+        ? 'At <b>' + count(N) + '</b> patients a month, extracting their reports with AI would cost about <b>' + inr(c.perPatient) + '</b> per patient, or <b>' + inrWords(c.monthly.total) + '</b> a month, using ' + routeName(c.id) + (S.values.route === 'cheapest' ? (['api', 'rented', 'owned'].filter(function (id) { return r.routes[id].available; }).length === 1 ? ', the only route your data rule allows' : ', the cheapest route allowed') : '') + '.'
         : 'With no patients, AI still costs <b>' + inrWords(c.monthly.total) + '</b> a month in fixed costs using ' + routeName(c.id) + '.');
       $('h-buyrent').innerHTML = buyRentSentence(r);
       var mb = c.manualBreakEven;
       var cheaper = c.perPatient !== null && c.perPatient < r.manualPerPatient;
-      var line = N > 0 ? ('Manual data entry costs about ' + inr(r.manualPerPatient) + ' per patient, so at this volume AI is ' + (cheaper ? 'cheaper' : 'more expensive') + '. ') : '';
+      var manualIllus0 = S.values.manualCostPerPatientInr === null && E.placeholdersInUse(S.data, S.values).some(function (a) { return a.group === 'manual'; });
+      var line = N > 0 ? ((manualIllus0 ? 'Against an illustrative manual cost of ' : 'Against a manual data-entry cost of ') + inr(r.manualPerPatient) + ' per patient, AI is ' + (cheaper ? 'cheaper' : 'more expensive') + ' at this volume. ') : '';
       if (mb.value === null) line += mb.reason;
       else line += 'AI would match manual entry at about ' + count(mb.value) + ' patients a month' + (mb.beyondCapacity ? ' (beyond one rig\'s capacity, so indicative only)' : '') + '.';
       $('h-manualline').textContent = line;
-      $('h-share').textContent = 'Compute is ' + pct(c.computeShare) + ' of the monthly bill; people and validation make up the rest.';
+      var fixedShare = c.monthly.total > 0 ? (c.monthly.engineering + c.monthly.validationOneTime + c.monthly.revalidation) / c.monthly.total : 0;
+      $('h-share').textContent = 'Compute is ' + pct(c.computeShare) + ' of the monthly bill; people and validation make up the rest.' + (fixedShare > 0.5 ? ' Most of the bill is fixed engineering and validation cost, so cost per patient falls steeply as volume rises.' : '');
     }
     var ph = E.placeholdersInUse(S.data, S.values);
-    $('h-notincluded').innerHTML = r.notIncluded.map(function (x) { return '<span class="chip ni">' + esc(x) + '</span>'; }).join('')
+    var order = [/Cost of money/, /uncaught errors/, /manual entry \(/, /Land/, /GST/];
+    var ni = r.notIncluded.slice().sort(function (a, b) { function rk(x) { for (var j = 0; j < order.length; j++) if (order[j].test(x)) return j; return order.length; } return rk(a) - rk(b); });
+    var shown = S.chipsOpen ? ni : ni.slice(0, 3);
+    $('h-notincluded').innerHTML = shown.map(function (x) { return '<span class="chip ni">' + esc(x) + '</span>'; }).join('')
+      + (ni.length > 3 ? '<button class="chip" id="chips-more">' + (S.chipsOpen ? 'Show fewer' : '+' + (ni.length - 3) + ' more not included') + '</button>' : '')
       + (ph.length ? '<span class="chip">' + ph.length + ' inputs are still placeholders or illustrations</span>' : '')
       + (S.built.meta.tariffFallback ? '<span class="chip">Electricity: national default used, no verified figure for this state</span>' : '');
-    $('h-flags').innerHTML = r.flags.filter(function (f) { return !/Repricing factor is 1/.test(f.text); }).map(function (f) { return '<div class="flag ' + f.level + '">' + esc(f.text) + '</div>'; }).join('');
+    $('h-flags').innerHTML = r.flags.slice().sort(function (a, b) { return (a.level === 'warn' ? 0 : 1) - (b.level === 'warn' ? 0 : 1); }).filter(function (f) { return !/Repricing factor is 1/.test(f.text); }).map(function (f) { return '<div class="flag ' + f.level + '">' + esc(f.text) + '</div>'; }).join('');
+    var more = $('chips-more'); if (more) more.onclick = function () { S.chipsOpen = !S.chipsOpen; renderHeadline(); };
     $('h-honest').textContent = 'This is an estimate built from your inputs and from defaults, each of which shows its source, status and last-verified date under the working. It is not a quote, and it is not a full cost while anything is listed as not included.';
     var st = S.built.meta.tariffRow;
-    $('c-state-hint').textContent = 'Landed tariff used: ₹' + S.built.inputs.gridTariff + '/kWh from ' + S.built.meta.tariffSource + (S.values.captiveOverride ? '; overridden by captive solar.' : '.');
+    $('c-state-hint').textContent = 'Electricity price used: ₹' + S.built.inputs.gridTariff + ' a unit, all charges included, from ' + S.built.meta.tariffSource + (S.values.captiveOverride ? '; overridden by captive solar.' : '.');
     $('c-review-v').textContent = pct(S.values.reviewFraction) + (S.values.reviewMode === 'accuracy' ? ' (ignored: worked out from accuracy, now ' + pct(r.review.fraction) + ')' : '');
-    $('c-reprice-v').textContent = S.values.repricingFactor.toFixed(1) + '×';
+    var kv = S.built.values.repricingFactor;
+    $('c-reprice-v').textContent = kv.toFixed(1) + '×' + (kv === 1 ? ' (no change)' : kv === 2 ? ' (prices double)' : '');
+    $('c-review-hint').textContent = (S.values.reviewFraction === S.defaults.reviewFraction ? 'Illustrative default. ' : '') + 'The most sensitive input. Measure it in a pilot.';
     void st;
   }
 
@@ -192,7 +211,18 @@
     }
   };
   var bgFill = { id: 'bgFill', beforeDraw: function (chart) { var c = chart.ctx; c.save(); c.fillStyle = COLORS.surface; c.fillRect(0, 0, chart.width, chart.height); c.restore(); } };
-  Chart.register(vLines, bgFill);
+  var barValues = {
+    id: 'barValues',
+    afterDatasetsDraw: function (chart, args, o) {
+      if (!o || !o.enabled) return;
+      var ctx = chart.ctx; ctx.save(); ctx.font = '11px ' + Chart.defaults.font.family; ctx.fillStyle = COLORS.ink; ctx.textAlign = 'center';
+      chart.data.datasets.forEach(function (ds, di) {
+        chart.getDatasetMeta(di).data.forEach(function (bar, j) { var v = ds.data[j]; if (v === null || v === undefined) return; ctx.fillText(inr(v), bar.x, bar.y - 4); });
+      });
+      ctx.restore();
+    }
+  };
+  Chart.register(vLines, bgFill, barValues);
 
   function tipInr(ctx) { return ctx.dataset.label + ': ' + inr(ctx.parsed.y !== undefined && ctx.chart.options.indexAxis !== 'y' ? ctx.parsed.y : ctx.parsed.x); }
 
@@ -224,7 +254,7 @@
         interaction: { mode: 'nearest', axis: 'x', intersect: false },
         scales: {
           x: { type: 'logarithmic', min: 10, max: 1000000, title: { display: true, text: 'Patients per month' }, grid: { color: '#EEE5D8' }, ticks: { callback: function (v) { return [10, 100, 1000, 10000, 100000, 1000000].indexOf(v) >= 0 ? (v >= 100000 ? (v / 100000) + ' lakh' : v.toLocaleString('en-IN')) : ''; } } },
-          y: { type: 'logarithmic', title: { display: true, text: 'Rupees per patient' }, grid: { color: '#EEE5D8' }, ticks: { callback: function (v) { var s = String(v); return /^[125]/.test(s) || v === 1 ? '₹' + v.toLocaleString('en-IN') : ''; } } }
+          y: { type: 'logarithmic', title: { display: true, text: 'Rupees per patient' }, grid: { color: '#EEE5D8' }, ticks: { callback: function (v) { return /^10*$/.test(String(v)) ? '₹' + v.toLocaleString('en-IN') : ''; } } }
         },
         plugins: {
           legend: { position: 'bottom', labels: { boxWidth: 14, boxHeight: 2 } },
@@ -270,6 +300,8 @@
         scales: { x: { beginAtZero: true, title: { display: true, text: 'Rupees per month' }, ticks: { callback: function (v) { return inrWords(v); } }, grid: { color: '#EEE5D8' } }, y: { grid: { display: false } } },
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { var k = keys[c.dataIndex]; return inr(c.parsed.x, { dp: 0 }) + ' a month (' + (S.built.inputs.payerShares[k] || 0) + '%)' + (r.patientsPerMonth > 0 ? ', ' + inr(c.parsed.x / r.patientsPerMonth) + ' per patient' : ''); } } } } }
     });
+    var paying = keys.filter(function (k) { return (S.built.inputs.payerShares[k] || 0) > 0; });
+    $('payers-sub').textContent = paying.length === 1 ? names[paying[0]] + ' pays 100% (' + (r.chosen && r.chosen.available ? inrWords(r.chosen.monthly.total) + ' a month' : '—') + '). Set the payer shares under the working to split it between patient, hospital, insurer or scheme, and a pooled consortium.' : 'The monthly total for the headline route, split by the payer shares you set under the working.';
     var pool = r.pooled ? [['Pooled: ' + r.pooled.centres + ' centres of ' + count(r.pooled.perCentreVolume) + ' patients', inr(r.pooled.perPatient) + ' per patient, against ' + inr(r.pooled.singleCentrePerPatient) + ' alone']] : [];
     S.tables.payers = { head: ['Payer', 'Share', 'Rupees per month'], rows: keys.map(function (k) { return [names[k], (S.built.inputs.payerShares[k] || 0) + '%', inr(r.whoPays[k] || 0, { dp: 0 })]; }).concat(pool.map(function (p) { return [p[0], '', p[1]]; })) };
   }
@@ -285,11 +317,19 @@
         { label: 'Stress-tested at ' + k.toFixed(1) + '×', data: ids.map(function (id) { return comp(r.routesStressed, id); }), backgroundColor: COLORS.s1, borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: 'start', borderColor: COLORS.surface, borderWidth: 2 }
       ] },
       options: { responsive: true, maintainAspectRatio: false, animation: false,
-        scales: { y: { beginAtZero: true, title: { display: true, text: 'Compute rupees per patient' }, ticks: { callback: function (v) { return inr(v); } }, grid: { color: '#EEE5D8' } }, x: { grid: { display: false } } },
-        plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + inr(c.parsed.y); } } } } }
+        scales: { y: { beginAtZero: true, title: { display: true, text: 'Compute rupees per patient' }, ticks: { callback: function (v) { return Number.isInteger(v) ? '₹' + v.toLocaleString('en-IN') : ''; } }, grid: { color: '#EEE5D8' } }, x: { grid: { display: false } } },
+        plugins: { barValues: { enabled: true }, legend: { position: 'bottom', labels: { boxWidth: 12 } }, tooltip: { callbacks: { label: function (c) { return c.dataset.label + ': ' + inr(c.parsed.y); } } } } }
     });
-    function beText(q, s) { return (q.value && !q.beyondCapacity ? count(q.value) : 'none within one rig') + ' → ' + (s.value && !s.beyondCapacity ? count(s.value) : 'none within one rig'); }
-    $('stress-sub').textContent = 'Compute cost per patient if cloud prices rise ' + k.toFixed(1) + '×. The owned rig is unchanged. Buy-versus-rent break-even moves from ' + beText(r.breakEven.ownedVsRented, r.breakEven.ownedVsRentedStressed) + ' patients a month against the rented GPU, and ' + beText(r.breakEven.ownedVsApi, r.breakEven.ownedVsApiStressed) + ' against the API. A scenario, not a forecast.';
+    function ok(b) { return b.value && !b.beyondCapacity; }
+    function beText(q, s, name) {
+      if (!ok(q) && !ok(s)) return 'Buying does not match the ' + name + ' at any volume one rig can handle, before or after repricing.';
+      if (!ok(q)) return 'Against the ' + name + ', buying starts to pay at about ' + count(s.value) + ' patients a month only after repricing.';
+      if (!ok(s)) return 'Against the ' + name + ', the break-even of about ' + count(q.value) + ' patients a month disappears after repricing.';
+      return 'Against the ' + name + ', the break-even moves from about ' + count(q.value) + ' to ' + count(s.value) + ' patients a month.';
+    }
+    $('stress-sub').textContent = k === 1
+      ? 'No repricing applied; move the repricing slider above 1.0× to test a price rise. The owned rig is unchanged by repricing.'
+      : 'Compute cost per patient if cloud prices change ' + k.toFixed(1) + '×; the owned rig is unchanged. ' + beText(r.breakEven.ownedVsRented, r.breakEven.ownedVsRentedStressed, 'rented GPU') + ' ' + beText(r.breakEven.ownedVsApi, r.breakEven.ownedVsApiStressed, 'API') + ' A scenario, not a forecast.';
     S.tables.stress = { head: ['Route', 'Quoted', 'Stress-tested'], rows: ids.map(function (id, j) { return [labels[j], inr(comp(r.routes, id)), inr(comp(r.routesStressed, id))]; }) };
   }
 
