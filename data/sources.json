@@ -1,0 +1,158 @@
+{
+  "meta": {
+    "description": "Every source cited by a default, a formula or a data row. 'howRead' records how the source was actually checked, so nobody mistakes a search snippet for a verified reading. Wikipedia is not an acceptable source anywhere in this project.",
+    "dataVersion": "2026-11-11"
+  },
+  "sources": [
+    {
+      "id": "pib-feb-2026-backgrounder",
+      "title": "PIB backgrounder on IndiaAI compute, February 2026 (38,000+ GPUs at about Rs 65 per hour)",
+      "publisher": "Press Information Bureau, Government of India",
+      "url": "https://static.pib.gov.in/WriteReadData/specificdocs/documents/2026/feb/doc2026210784401.pdf",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "States that 38,000+ GPUs are available at Rs 65 per hour. Secondary reports say PIB describes this as an average 'except for select high-end GPUs'. Open the PDF and the IndiaAI portal rate list before relying on it."
+    },
+    {
+      "id": "indiaai-compute-portal",
+      "title": "IndiaAI Compute Portal (rate list and eligibility)",
+      "publisher": "IndiaAI Mission, MeitY",
+      "url": "https://indiaai.gov.in/",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "not opened",
+      "notes": "The source of truth for portal GPU rates. Not opened during this build; the per-GPU figures in compute_prices.json come from a secondary reading of the portal calculator and must be checked here."
+    },
+    {
+      "id": "ecorpit-indiaai-rates-nov-2026",
+      "title": "IndiaAI GPU empanelment by C-DAC: portal rates and comparison (read 1 November 2026)",
+      "publisher": "eCorpIT (secondary)",
+      "url": "https://ecorpit.com/indiaai-10000-gpu-cdac-empanelment-2027/",
+      "type": "secondary",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Reports portal L1 rates excluding GST: H100 SXM Rs 153 per GPU-hour on demand, Rs 117 on 12-month reservation; list prices E2E Rs 379.05, Yotta Rs 356; AWS Capacity Block Mumbai USD 5.970 per H100-hour; subsidy capped at 40%."
+    },
+    {
+      "id": "productgrowth-gpu-price-india",
+      "title": "How much does a GPU cost per hour in India? (checked 1 November 2026)",
+      "publisher": "ProductGrowth (secondary)",
+      "url": "https://productgrowth.in/numbers/gpu-cloud-price-per-hour-india/",
+      "type": "secondary",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Cites PIB 25 March 2026 for the Rs 65 average and lists H100 SXM 80GB on demand at Shakti Cloud at Rs 356 per hour as read on 30 October 2026."
+    },
+    {
+      "id": "companies-act-schedule-ii",
+      "title": "Companies Act, 2013, Schedule II, Part C (useful lives): Computers and data processing units",
+      "publisher": "Ministry of Corporate Affairs (bare act text via TaxGuru extract)",
+      "url": "https://taxguru.in/company-law/depreciation-companies-act-2013-brief-analysis.html",
+      "type": "statute",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet, corroborated by an EPFO circular",
+      "notes": "Part C item XII: (i) Servers and networks, 6 years; (ii) End user devices such as desktops and laptops, 3 years. Residual value ordinarily not more than 5% of original cost. A GPU server falls under (i). Confirm against the MCA gazette text."
+    },
+    {
+      "id": "epfo-depreciation-circular-2026",
+      "title": "EPFO office order on depreciation as per Part C of Schedule II (servers and networks 6 years, end user devices 3 years)",
+      "publisher": "Employees' Provident Fund Organisation",
+      "url": "https://www.epfindia.gov.in/site_docs/PDFs/Circulars/Y2026-2027/OO_Hindi_12.pdf",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Government document reproducing Schedule II lives: servers and networks 6 years (15.83% SLM), end user devices 3 years (31.67% SLM)."
+    },
+    {
+      "id": "incometax-depreciation-rates",
+      "title": "Depreciation under the Income-tax Act: rates of depreciation (computers including computer software)",
+      "publisher": "Income Tax Department, Government of India",
+      "url": "https://www.incometaxindia.gov.in/w/depreciation-under-the-income-tax-act",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Computers including computer software: 40% WDV (reduced from 60% from AY 2018-19)."
+    },
+    {
+      "id": "income-tax-act-2025-depreciation",
+      "title": "Depreciation under the Income-tax Act, 2025 (in force from 1 April 2026)",
+      "publisher": "TaxGuru (secondary)",
+      "url": "https://taxguru.in/?p=1036553",
+      "type": "secondary",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Reports that the 1961 Act's depreciation provisions are re-enacted in the Income-tax Act, 2025, with computers and software retained at 40% WDV. Secondary sources disagree on the section number (33, 34 or 35), so cite the Gazette text once confirmed."
+    },
+    {
+      "id": "llama3-paper",
+      "title": "The Llama 3 Herd of Models, section 3.3.4 Reliability and operational challenges",
+      "publisher": "Meta AI (arXiv 2407.21783)",
+      "url": "https://arxiv.org/abs/2407.21783",
+      "type": "report",
+      "accessed": "2026-11-11",
+      "howRead": "section read through a fetch tool (HTML v3)",
+      "notes": "54-day snapshot; 466 interruptions, 419 unexpected; up to 16,384 H100 GPUs; Faulty GPU 148, GPU HBM3 memory 72, GPU SRAM 19, GPU system processor 17. About 78% of unexpected interruptions attributed to confirmed or suspected hardware. These are job interruptions, not confirmed replacements."
+    },
+    {
+      "id": "bharatdcim-state-tariffs",
+      "title": "State-wise HT industrial tariff quick reference and effective all-in rates, FY 2025-26",
+      "publisher": "BharatDCIM (secondary; cites MERC, TNERC, KERC and TSERC orders)",
+      "url": "https://bharatdcim.pages.dev/blog/karnataka-dc-power-tariff-2026",
+      "type": "secondary",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Effective all-in rates for a 24x7 data-centre load: Karnataka about Rs 8.50, Maharashtra about Rs 11.50, Telangana about Rs 10.16, Tamil Nadu about Rs 11.26 per unit. Category is HT industrial, which may differ from the category a hospital is billed under."
+    },
+    {
+      "id": "ogd-state-electricity",
+      "title": "Open Government Data Platform India: state-wise average electricity rates",
+      "publisher": "data.gov.in",
+      "url": "https://data.gov.in/",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "not opened",
+      "notes": "Named route for refreshing the tariff table. Specific dataset link to be recorded by the first contributor who uses it."
+    },
+    {
+      "id": "niti-iced",
+      "title": "NITI Aayog India Climate and Energy Dashboard (state and DISCOM tariffs)",
+      "publisher": "NITI Aayog",
+      "url": "https://iced.niti.gov.in/",
+      "type": "government",
+      "accessed": "2026-11-11",
+      "howRead": "not opened",
+      "notes": "Dashboard, not a documented API. Named route for refreshing the tariff table."
+    },
+    {
+      "id": "gst-cloud-18",
+      "title": "GST on cloud services: 18% under SAC 9983; healthcare by clinical establishments exempt",
+      "publisher": "TaxClue (secondary)",
+      "url": "https://taxclue.in/gst-on-it-services",
+      "type": "secondary",
+      "accessed": "2026-11-11",
+      "howRead": "search snippet",
+      "notes": "Cloud and SaaS services are taxed at 18%. Because hospital healthcare services are exempt, input tax credit on cloud bills is generally not available to a hospital, so the 18% is likely a real cost. Confirm with the hospital's tax adviser."
+    },
+    {
+      "id": "backblaze-drive-stats",
+      "title": "Backblaze hard drive test data (published drive failure statistics)",
+      "publisher": "Backblaze",
+      "url": "https://www.backblaze.com/cloud-storage/resources/hard-drive-test-data",
+      "type": "report",
+      "accessed": "2026-11-11",
+      "howRead": "not opened",
+      "notes": "Cited as the model for an open GPU failure-log dataset. It provides no GPU figure and is not used as a default."
+    },
+    {
+      "id": "author-brief",
+      "title": "Vyaya handover brief (design decisions and synthetic illustration values)",
+      "publisher": "Project author",
+      "url": "",
+      "type": "internal",
+      "accessed": "2026-11-11",
+      "howRead": "read in full",
+      "notes": "Source of illustrative values only. The brief states that these are invented for illustration and are not findings."
+    }
+  ]
+}

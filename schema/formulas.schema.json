@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vyaya derivation record",
+  "type": "object",
+  "required": [
+    "meta",
+    "formulas"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object"
+    },
+    "formulas": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "section",
+          "name",
+          "expression",
+          "units",
+          "inputs",
+          "trace",
+          "derivation",
+          "sources",
+          "version",
+          "changeFromBrief"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "section": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "expression": {
+            "type": "string"
+          },
+          "units": {
+            "type": "string"
+          },
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "trace": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "derivation": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "version": {
+            "type": "string"
+          },
+          "changeFromBrief": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

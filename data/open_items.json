@@ -1,0 +1,16 @@
+{
+  "meta": {
+    "description": "Open items and honest limits. Anything unresolved by the review council is recorded here with each side's reasoning; the author decides.",
+    "dataVersion": "2026-11-11"
+  },
+  "items": [
+    { "id": "OI-1", "topic": "IndiaAI pricing", "status": "open", "detail": "Sources disagree: about Rs 65 (PIB average, except select high-end GPUs), Rs 67 to 100, and portal L1 bids of Rs 115.85 to 153 before subsidy. The portal rate list itself has not been opened.", "decision": "Pending verification on the portal." },
+    { "id": "OI-2", "topic": "State electricity tariffs", "status": "open", "detail": "No live API exists. Four states are seeded from a secondary source for the HT industrial category; a hospital may be billed under HT commercial or institutional. All other states fall back to a national working default of Rs 9 that has not been verified against any tariff order.", "decision": "Seed from SERC tariff orders by pull request; refresh annually." },
+    { "id": "OI-3", "topic": "GPU failure rate", "status": "open", "detail": "The 9% default annualises 54 days of one operator's training cluster and counts job interruptions, not replacements. No Indian or inference figure exists.", "decision": "Kept as a flagged placeholder. Whether an open, Backblaze-style failure-log dataset from Indian institutional clusters belongs in this project or a separate paper is undecided." },
+    { "id": "OI-4", "topic": "Unsourced inputs", "status": "open", "detail": "Purchase price, utilisation, throughput, review fraction, manual baseline, cost per uncaught error and the repricing factor have no authoritative source. Published validation costs for Indian hospital deployments are scarce.", "decision": "User inputs, flagged on every output while left at their illustrative defaults." },
+    { "id": "OI-5", "topic": "Hardware life default", "status": "decided-pending-author", "detail": "The brief cited 3 years under Schedule II for computers. Schedule II Part C item XII gives 6 years for servers and networks and 3 years for end-user devices. A GPU server is a server. The default is set to 6 years with the history recorded; a user can set 3.", "decision": "Author to confirm." },
+    { "id": "OI-6", "topic": "Income-tax Act, 2025", "status": "open", "detail": "The Income-tax Act, 2025 replaced the 1961 Act from 1 April 2026. Secondary sources agree computers stay at 40% WDV but disagree on the section number (33, 34 or 35).", "decision": "Cite the Gazette text once confirmed." },
+    { "id": "OI-7", "topic": "GST on cloud bills", "status": "open", "detail": "Defaulted to 18% as non-recoverable because hospital healthcare services are GST-exempt and input tax credit is generally unavailable. Treatment depends on the hospital's structure.", "decision": "Confirm with a tax adviser; the input can be set to zero." },
+    { "id": "OI-8", "topic": "Licence and data reviewer", "status": "open", "detail": "Licence set to MIT. The reviewer for contributed data has not been assigned.", "decision": "Author to assign." }
+  ]
+}

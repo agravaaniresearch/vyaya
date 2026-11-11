@@ -1,0 +1,463 @@
+{
+  "meta": {
+    "description": "State-wise landed grid electricity tariff in rupees per kWh, covering energy charge, demand or fixed charge spread over units, fuel adjustment, electricity duty and surcharges. Commercial or HT categories only: domestic rates are deliberately excluded. Seeded from open and secondary data; the source of truth is each State Electricity Regulatory Commission's annual tariff order. Refresh annually.",
+    "dataVersion": "2026-11-11",
+    "unit": "INR/kWh"
+  },
+  "rows": [
+    {
+      "id": "national-default",
+      "state": "National working default",
+      "code": "IN",
+      "category": "HT, data-centre grade (working default)",
+      "landedInrPerKwh": 9.0,
+      "status": "placeholder",
+      "sources": [
+        "author-brief"
+      ],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "The brief's working default from search snippets giving 8.20 to 10.20 rupees per kWh in data-centre clusters. Not verified against any tariff order. Used for any state without a verified row."
+    },
+    {
+      "id": "an",
+      "state": "Andaman and Nicobar Islands",
+      "code": "AN",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ap",
+      "state": "Andhra Pradesh",
+      "code": "AP",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ar",
+      "state": "Arunachal Pradesh",
+      "code": "AR",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "as",
+      "state": "Assam",
+      "code": "AS",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "br",
+      "state": "Bihar",
+      "code": "BR",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ch",
+      "state": "Chandigarh",
+      "code": "CH",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "cg",
+      "state": "Chhattisgarh",
+      "code": "CG",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "dn",
+      "state": "Dadra and Nagar Haveli and Daman and Diu",
+      "code": "DN",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "dl",
+      "state": "Delhi",
+      "code": "DL",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ga",
+      "state": "Goa",
+      "code": "GA",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "gj",
+      "state": "Gujarat",
+      "code": "GJ",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "hr",
+      "state": "Haryana",
+      "code": "HR",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "hp",
+      "state": "Himachal Pradesh",
+      "code": "HP",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "jk",
+      "state": "Jammu and Kashmir",
+      "code": "JK",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "jh",
+      "state": "Jharkhand",
+      "code": "JH",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ka",
+      "state": "Karnataka",
+      "code": "KA",
+      "category": "HT industrial (data-centre profile)",
+      "landedInrPerKwh": 8.5,
+      "status": "secondary",
+      "sources": [
+        "bharatdcim-state-tariffs"
+      ],
+      "lastVerified": "2026-11-11",
+      "tariffYear": "2025-26",
+      "note": "BESCOM HT-2(a), FY 2025-26; effective all-in for a 24x7 load including demand charges. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+    },
+    {
+      "id": "kl",
+      "state": "Kerala",
+      "code": "KL",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "la",
+      "state": "Ladakh",
+      "code": "LA",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ld",
+      "state": "Lakshadweep",
+      "code": "LD",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "mp",
+      "state": "Madhya Pradesh",
+      "code": "MP",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "mh",
+      "state": "Maharashtra",
+      "code": "MH",
+      "category": "HT industrial (data-centre profile)",
+      "landedInrPerKwh": 11.5,
+      "status": "secondary",
+      "sources": [
+        "bharatdcim-state-tariffs"
+      ],
+      "lastVerified": "2026-11-11",
+      "tariffYear": "2025-26",
+      "note": "MSEDCL HT industrial, FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+    },
+    {
+      "id": "mn",
+      "state": "Manipur",
+      "code": "MN",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "ml",
+      "state": "Meghalaya",
+      "code": "ML",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "mz",
+      "state": "Mizoram",
+      "code": "MZ",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "nl",
+      "state": "Nagaland",
+      "code": "NL",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "od",
+      "state": "Odisha",
+      "code": "OD",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "py",
+      "state": "Puducherry",
+      "code": "PY",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "pb",
+      "state": "Punjab",
+      "code": "PB",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "rj",
+      "state": "Rajasthan",
+      "code": "RJ",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "sk",
+      "state": "Sikkim",
+      "code": "SK",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "tn",
+      "state": "Tamil Nadu",
+      "code": "TN",
+      "category": "HT industrial (data-centre profile)",
+      "landedInrPerKwh": 11.26,
+      "status": "secondary",
+      "sources": [
+        "bharatdcim-state-tariffs"
+      ],
+      "lastVerified": "2026-11-11",
+      "tariffYear": "2025-26",
+      "note": "TANGEDCO HT industrial, FY 2025-26; effective all-in for a 24x7 load. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+    },
+    {
+      "id": "ts",
+      "state": "Telangana",
+      "code": "TS",
+      "category": "HT industrial (data-centre profile)",
+      "landedInrPerKwh": 10.16,
+      "status": "secondary",
+      "sources": [
+        "bharatdcim-state-tariffs"
+      ],
+      "lastVerified": "2026-11-11",
+      "tariffYear": "2025-26",
+      "note": "TGSPDCL HT-I(A), FY 2025-26; effective all-in for a 24x7 load. Billed per kVAh. A hospital may be billed under HT commercial or institutional instead; check the category on your own bill and the SERC order."
+    },
+    {
+      "id": "tr",
+      "state": "Tripura",
+      "code": "TR",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "up",
+      "state": "Uttar Pradesh",
+      "code": "UP",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "uk",
+      "state": "Uttarakhand",
+      "code": "UK",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    },
+    {
+      "id": "wb",
+      "state": "West Bengal",
+      "code": "WB",
+      "category": "HT commercial or institutional",
+      "landedInrPerKwh": null,
+      "status": "missing",
+      "sources": [],
+      "lastVerified": null,
+      "tariffYear": null,
+      "note": "No verified figure yet; the national working default is used and flagged. Contributions welcome from the SERC tariff order."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vyaya sources",
+  "type": "object",
+  "required": [
+    "meta",
+    "sources"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "description",
+        "dataVersion"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "dataVersion": {
+          "type": "string"
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "publisher",
+          "url",
+          "type",
+          "accessed",
+          "howRead",
+          "notes"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "not": {
+              "pattern": "wikipedia\\.org"
+            }
+          },
+          "type": {
+            "enum": [
+              "statute",
+              "government",
+              "report",
+              "secondary",
+              "internal",
+              "vendor"
+            ]
+          },
+          "accessed": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "howRead": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

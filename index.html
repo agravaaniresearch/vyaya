@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vyaya: what it costs to run AI on clinical reports</title>
+<meta name="description" content="A transparent, browser-only calculator for the cost per patient of using AI to extract data from printed clinical reports in Indian hospitals.">
+<link rel="stylesheet" href="css/vyaya.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Vyaya <span>व्यय, expenditure</span></h1>
+    <p>What it costs, per patient and per month, for a hospital to use AI to pull structured data out of printed clinical reports, and whether buying a machine or renting compute works out cheaper. Everything runs in your browser; nothing you enter leaves your device.</p>
+  </header>
+
+  <section class="headline" id="headline" aria-live="polite">
+    <div class="nums">
+      <div class="num"><div class="v" id="h-pp">…</div><div class="l">AI cost per patient</div></div>
+      <div class="num"><div class="v" id="h-month">…</div><div class="l">AI cost per month</div></div>
+      <div class="num"><div class="v" id="h-manual">…</div><div class="l">Manual entry per patient</div></div>
+    </div>
+    <p class="lead" id="h-sentence"></p>
+    <p id="h-buyrent"></p>
+    <p id="h-manualline"></p>
+    <p class="small" id="h-share"></p>
+    <div class="chips" id="h-notincluded"></div>
+    <div class="flags" id="h-flags"></div>
+    <p class="small" id="h-honest"></p>
+  </section>
+
+  <section class="controls" aria-label="Main controls">
+    <div class="ctl main">
+      <label for="c-patients">Patients per month</label>
+      <div class="row">
+        <input type="range" id="c-patients-range" min="0" max="1000" step="1" aria-label="Patients per month, slider">
+        <input type="number" id="c-patients" min="0" step="1">
+      </div>
+      <div class="hint">The slider runs from 10 to 10 lakh patients on a log scale; type any figure in the box.</div>
+    </div>
+    <div class="ctl"><label for="c-state">State, for grid electricity</label><select id="c-state"></select><div class="hint" id="c-state-hint"></div></div>
+    <div class="ctl"><label for="c-route">Route used for the headline</label><select id="c-route"></select></div>
+    <div class="ctl"><label for="c-residency">Data-residency rule</label><select id="c-residency"></select></div>
+    <div class="ctl"><label for="c-tier">Rented GPU tier</label><select id="c-tier"></select></div>
+    <div class="ctl"><label for="c-review">Share of outputs reviewed by staff: <b id="c-review-v"></b></label><div class="row"><input type="range" id="c-review" min="0" max="1" step="0.01"></div><div class="hint">The most sensitive input. Measure it in a pilot.</div></div>
+    <div class="ctl"><label for="c-reprice">Cloud repricing scenario: <b id="c-reprice-v"></b></label><div class="row"><input type="range" id="c-reprice" min="0.5" max="5" step="0.1"></div><div class="hint">What if subsidised cloud prices end? A scenario, not a forecast.</div></div>
+  </section>
+
+  <section class="charts">
+    <article class="card" id="card-volume">
+      <h2>Cost per patient as volume grows</h2>
+      <p class="sub">Both axes are logarithmic. Vertical lines mark the break-even points and your current volume.</p>
+      <div class="canvas-box"><canvas id="ch-volume" role="img" aria-label="Line chart of cost per patient against patients per month for each route and manual entry"></canvas></div>
+      <div class="actions"><span class="seg" id="vol-mode"><button data-v="all" class="on">All-in</button><button data-v="compute">Compute only</button></span><span class="sp"></span></div>
+    </article>
+    <article class="card" id="card-money">
+      <h2>Where the money goes each month</h2>
+      <p class="sub">Monthly cost at your volume, by route. Compute is usually the smallest part.</p>
+      <div class="canvas-box"><canvas id="ch-money" role="img" aria-label="Stacked bar chart of monthly cost by component for each route"></canvas></div>
+      <div class="actions"><span class="sp"></span></div>
+    </article>
+    <article class="card" id="card-payers">
+      <h2>Who pays</h2>
+      <p class="sub">The monthly total for the headline route, split by the payer shares you set under the working.</p>
+      <div class="canvas-box"><canvas id="ch-payers" role="img" aria-label="Bar chart of monthly cost by payer"></canvas></div>
+      <div class="actions"><span class="sp"></span></div>
+    </article>
+    <article class="card" id="card-stress">
+      <h2>Quoted versus stress-tested compute cost</h2>
+      <p class="sub" id="stress-sub">Compute cost per patient if cloud prices rise by the repricing factor.</p>
+      <div class="canvas-box"><canvas id="ch-stress" role="img" aria-label="Grouped bar chart of quoted and stress-tested compute cost per patient"></canvas></div>
+      <div class="actions"><span class="sp"></span></div>
+    </article>
+  </section>
+
+  <div class="detail-toggle"><button class="btn primary" id="toggle-detail" aria-expanded="false" aria-controls="detail">Show the working: every input, formula and source</button></div>
+
+  <section class="detail hidden" id="detail">
+    <nav class="tabs" role="tablist">
+      <button data-tab="inputs" class="on" role="tab">All inputs</button>
+      <button data-tab="formulas" role="tab">Formulas and live values</button>
+      <button data-tab="register" role="tab">Assumptions register</button>
+      <button data-tab="sources" role="tab">Sources</button>
+      <button data-tab="open" role="tab">Open items</button>
+      <button data-tab="history" role="tab">Change history</button>
+    </nav>
+    <div id="tab-inputs"></div>
+    <div id="tab-formulas" class="hidden"></div>
+    <div id="tab-register" class="hidden"></div>
+    <div id="tab-sources" class="hidden"></div>
+    <div id="tab-open" class="hidden"></div>
+    <div id="tab-history" class="hidden"></div>
+    <p class="small" style="margin-top:14px"><button class="btn" id="reset">Reset all inputs to defaults</button> <button class="btn" id="copylink">Copy a link to this scenario</button> <span id="copied"></span></p>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/pptxgen.bundle.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

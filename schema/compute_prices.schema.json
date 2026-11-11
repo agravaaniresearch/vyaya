@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vyaya rented GPU price tiers",
+  "type": "object",
+  "required": [
+    "meta",
+    "rows"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "description",
+        "dataVersion"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "dataVersion": {
+          "type": "string"
+        }
+      }
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "tier",
+          "label",
+          "gpu",
+          "pricePerGpuHour",
+          "currency",
+          "hostedInIndia",
+          "status",
+          "sources",
+          "lastVerified",
+          "note"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tier": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "gpu": {
+            "type": "string"
+          },
+          "pricePerGpuHour": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "currency": {
+            "enum": [
+              "INR",
+              "USD"
+            ]
+          },
+          "hostedInIndia": {
+            "type": "boolean"
+          },
+          "status": {
+            "enum": [
+              "secondary",
+              "placeholder",
+              "user",
+              "verified",
+              "vendor"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastVerified": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "note": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

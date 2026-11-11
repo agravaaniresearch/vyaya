@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Vyaya assumptions register",
+  "type": "object",
+  "required": [
+    "meta",
+    "groups",
+    "assumptions",
+    "alwaysExcluded"
+  ],
+  "properties": {
+    "meta": {
+      "type": "object"
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label"
+        ]
+      }
+    },
+    "alwaysExcluded": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "group",
+          "label",
+          "unit",
+          "value",
+          "status",
+          "sources",
+          "lastVerified",
+          "reason",
+          "history"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+          },
+          "group": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "value": {
+            "type": [
+              "number",
+              "string",
+              "boolean",
+              "null"
+            ]
+          },
+          "nullable": {
+            "type": "boolean"
+          },
+          "type": {
+            "enum": [
+              "number",
+              "bool",
+              "select"
+            ]
+          },
+          "options": {
+            "type": "array"
+          },
+          "optionsFrom": {
+            "enum": [
+              "compute_prices",
+              "electricity_tariffs"
+            ]
+          },
+          "min": {
+            "type": "number"
+          },
+          "max": {
+            "type": "number"
+          },
+          "step": {
+            "type": "number"
+          },
+          "status": {
+            "enum": [
+              "statutory",
+              "secondary",
+              "placeholder",
+              "illustrative",
+              "user",
+              "constant"
+            ]
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastVerified": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "date",
+                "previous",
+                "reason"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}
