@@ -10,6 +10,7 @@ Changes after the review council (see `docs/REVIEW-FINDINGS.md`).
 - Data: added a `verification` field to the data and schemas. Last-verified dates were removed where only a snippet was read. The PIB wording was corrected. The IndiaAI rows are labelled "eligibility required". The hyperscaler row is relabelled as reserved capacity. Residual value is now a user input. Governance is relabelled for the DPDP Act and CDSCO. Notes were added on ITC apportionment, out-of-pocket payers, and the scope of the statutes. Open items OI-9 to OI-12 were added.
 - Page: front-screen wording and charts were revised for non-expert readers. The mobile layout was fixed. Chart exports are rendered at twice the resolution.
 - Tests: 44 in total, including a regression test for each council fix.
+- Exports: inside a sandboxed viewer the page uses the host's downloads capability when it is offered, and ordinary links elsewhere.
 
 ## 0.1.0 — 11 November 2026 (data 2026-11-11)
 

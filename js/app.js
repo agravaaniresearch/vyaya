@@ -400,18 +400,26 @@
   }
 
   function download(url, name) { var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
+  // Inside a sandboxed viewer (such as a claude.ai artifact) plain downloads are blocked; use the host's
+  // downloads capability when it is offered, and an ordinary link everywhere else (GitHub Pages, local file).
+  var dlCap = null;
+  try { if (window.claude && typeof window.claude.use === 'function') window.claude.use('downloads').then(function (d) { dlCap = d; }, function () {}); } catch (e) { /* not in a viewer */ }
+  function saveBlob(blob, name) {
+    if (dlCap) return dlCap.save({ filename: name, data: blob }).catch(function (e) { if (!e || e.code !== 'declined') console.warn('Save failed', e); });
+    var url = URL.createObjectURL(blob); download(url, name); setTimeout(function () { URL.revokeObjectURL(url); }, 5000);
+  }
 
   function exportChart(key, card, fmt) {
     var cv = composeImage(key, card), base = 'vyaya-' + key + '-' + new Date().toISOString().slice(0, 10);
-    if (fmt === 'PNG') return download(cv.toDataURL('image/png'), base + '.png');
-    if (fmt === 'JPEG') return download(cv.toDataURL('image/jpeg', 0.92), base + '.jpg');
+    if (fmt === 'PNG') return cv.toBlob(function (bl) { saveBlob(bl, base + '.png'); }, 'image/png');
+    if (fmt === 'JPEG') return cv.toBlob(function (bl) { saveBlob(bl, base + '.jpg'); }, 'image/jpeg', 0.92);
     var pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 in
     var slide = pptx.addSlide(); slide.background = { color: 'FBF7F0' };
     var ratio = cv.height / cv.width, maxW = 13.33 - 0.6, maxH = 7.5 - 0.4;
     var w = Math.min(maxW, maxH / ratio), h = w * ratio;
     slide.addImage({ data: cv.toDataURL('image/png'), x: (13.33 - w) / 2, y: (7.5 - h) / 2, w: w, h: h });
     slide.addNotes(caveatLines().join('\n'));
-    pptx.writeFile({ fileName: base + '.pptx' });
+    pptx.write({ outputType: 'blob' }).then(function (bl) { saveBlob(bl, base + '.pptx'); });
   }
 
   /* ---------- detail view ---------- */
